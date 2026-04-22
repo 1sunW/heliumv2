@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { MOVIES, ANIME_DATA, TV_SHOWS, type ContentItem } from './data';
+import { MOVIES, ANIME_DATA, TV_SHOWS, PROXY_GROUPS, type ContentItem, type ProxyGroup } from './data';
+import { fetchGames, GAME_PROVIDERS, TRUFFLED_PROXIES, GAME_CATEGORIES, type GameItem } from './gameService';
 import { 
   Coffee, 
   Search, 
@@ -20,7 +21,10 @@ import {
   Zap,
   Layers,
   Home as HomeIcon,
-  Ghost
+  Ghost,
+  Shield,
+  ExternalLink,
+  Globe
 } from 'lucide-react';
 
 type CategoryType = 'Home' | 'Movies' | 'Games' | 'Anime' | 'Proxies' | 'Music' | 'TV Shows' | 'Books' | 'Hacks' | 'Extra';
@@ -33,6 +37,47 @@ export default function App() {
   const [libraryIds, setLibraryIds] = useState<string[]>([]);
   const [clickCounts, setClickCounts] = useState<Record<string, number>>({});
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // Games state
+  const [games, setGames] = useState<GameItem[]>([]);
+  const [selectedProvider, setSelectedProvider] = useState(GAME_PROVIDERS[0].id);
+  const [selectedProxy, setSelectedProxy] = useState(TRUFFLED_PROXIES[0].url);
+  const [selectedGameCategory, setSelectedGameCategory] = useState('');
+  const [sortMethod, setSortMethod] = useState('a-z');
+  const [isLoadingGames, setIsLoadingGames] = useState(false);
+  const [selectedGame, setSelectedGame] = useState<GameItem | null>(null);
+  const [erroredImages, setErroredImages] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (activeCategory === 'Games') {
+      const load = async () => {
+        setIsLoadingGames(true);
+        const fetched = await fetchGames(selectedProvider, selectedProxy);
+        setGames(fetched);
+        setErroredImages(new Set()); // Reset on provider change
+        setIsLoadingGames(false);
+      };
+      load();
+    }
+  }, [activeCategory, selectedProvider, selectedProxy]);
+
+  const filteredGames = useMemo(() => {
+    let filtered = games.filter(g => {
+      const matchesQuery = g.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = !selectedGameCategory || (g.categories && g.categories.includes(selectedGameCategory.toLowerCase()));
+      return matchesQuery && matchesCategory;
+    });
+
+    filtered.sort((a, b) => {
+      if (sortMethod === 'a-z') return a.name.localeCompare(b.name);
+      if (sortMethod === 'z-a') return b.name.localeCompare(a.name);
+      if (sortMethod === 'latest') return b.addedOrder - a.addedOrder;
+      if (sortMethod === 'oldest') return a.addedOrder - b.addedOrder;
+      return 0;
+    });
+
+    return filtered;
+  }, [games, searchQuery, selectedGameCategory, sortMethod]);
 
   const featuredMovie = MOVIES[0];
 
@@ -44,7 +89,11 @@ export default function App() {
     if (!libraryIds.includes(movie.id)) {
       setLibraryIds(prev => [...prev, movie.id]);
     }
-    console.log(`Opening ${movie.title} in Google Drive...`);
+    
+    // Open the drive link if it exists, otherwise fallback to a search
+    const link = movie.driveLink || `https://www.google.com/search?q=${encodeURIComponent(movie.title)}+google+drive+link`;
+    window.open(link, '_blank');
+    console.log(`Opening ${movie.title} link...`);
   };
 
   const allItems = [...MOVIES, ...ANIME_DATA, ...TV_SHOWS];
@@ -52,11 +101,11 @@ export default function App() {
   const displayedItems = activeView === 'library' 
     ? allItems.filter(m => libraryIds.includes(m.id))
     : activeCategory === 'Movies' 
-      ? MOVIES 
+      ? allItems.filter(item => item.type === 'movie')
       : activeCategory === 'Anime' 
-        ? ANIME_DATA 
+        ? allItems.filter(item => item.type === 'anime')
         : activeCategory === 'TV Shows'
-          ? TV_SHOWS
+          ? allItems.filter(item => item.type === 'tv')
           : [];
 
   const filteredItems = displayedItems.filter(item => 
@@ -70,7 +119,7 @@ export default function App() {
   return (
     <div className="flex flex-col h-screen w-screen border-imm-border border-8 box-border overflow-hidden selection:bg-imm-accent/30 bg-imm-bg">
       {/* Top Category Bar */}
-      <div className="bg-imm-sidebar border-b border-imm-border shrink-0 flex items-center px-6 overflow-x-auto no-scrollbar py-3 gap-8 z-30">
+      <div className="bg-imm-sidebar border-b border-imm-border shrink-0 flex items-center px-6 overflow-x-auto no-scrollbar py-3 gap-8 z-50">
         <div className="flex items-center gap-2 mr-4 shrink-0">
           <Play className="w-5 h-5 text-imm-accent fill-current" />
           <span className="serif text-xl font-bold text-imm-accent">Helium</span>
@@ -90,7 +139,7 @@ export default function App() {
 
       <div className="flex flex-1 overflow-hidden relative">
         {/* Sidebar Navigation (Context Sensitive) */}
-        {(activeCategory === 'Movies' || activeCategory === 'Home') && (
+        {(activeCategory === 'Movies' || activeCategory === 'Home' || activeCategory === 'Anime' || activeCategory === 'TV Shows') && (
           <aside className="hidden lg:flex w-64 bg-imm-sidebar border-r border-imm-border flex-col p-8 z-20">
             <div className="flex items-center gap-3 mb-10">
               <span className="text-[10px] uppercase tracking-widest text-imm-accent/60 font-bold">Navigation</span>
@@ -132,9 +181,57 @@ export default function App() {
           <div className="absolute top-0 right-0 w-96 h-96 bg-imm-accent/10 rounded-full blur-[150px] pointer-events-none"></div>
 
           {/* Header */}
-          <header className="h-20 shrink-0 px-6 lg:px-10 flex items-center justify-between border-b border-imm-border z-10 sticky top-0 bg-imm-bg/80 backdrop-blur-sm">
+          <header className="h-20 shrink-0 px-6 lg:px-10 flex items-center justify-between border-b border-imm-border z-[100] sticky top-0 bg-imm-bg/95 backdrop-blur-md shadow-sm">
             <div className="flex items-center gap-4">
               <h2 className="serif text-xl tracking-wide">{activeCategory} View</h2>
+              
+              {activeCategory === 'Games' && (
+                <div className="flex items-center gap-3 ml-4">
+                  <select 
+                    value={selectedProvider} 
+                    onChange={(e) => setSelectedProvider(e.target.value)}
+                    className="bg-imm-card border border-imm-border text-imm-text text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-lg focus:outline-none focus:border-imm-accent"
+                  >
+                    {GAME_PROVIDERS.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                  </select>
+
+                  {selectedProvider === 'truffled' && (
+                    <select 
+                      value={selectedProxy} 
+                      onChange={(e) => setSelectedProxy(e.target.value)}
+                      className="bg-imm-card border border-imm-border text-imm-text text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-lg focus:outline-none focus:border-imm-accent"
+                    >
+                      {TRUFFLED_PROXIES.map(p => <option key={p.url} value={p.url}>{p.name}</option>)}
+                    </select>
+                  )}
+
+                  {selectedProvider === 'petezah' && (
+                    <select 
+                      value={selectedGameCategory} 
+                      onChange={(e) => setSelectedGameCategory(e.target.value)}
+                      className="bg-imm-card border border-imm-border text-imm-text text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-lg focus:outline-none focus:border-imm-accent"
+                    >
+                      <option value="">All Categories</option>
+                      {GAME_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  )}
+
+                  <select 
+                    value={sortMethod} 
+                    onChange={(e) => setSortMethod(e.target.value)}
+                    className="bg-imm-card border border-imm-border text-imm-text text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-lg focus:outline-none focus:border-imm-accent"
+                  >
+                    {selectedProvider === 'gn-math' && (
+                      <>
+                        <option value="latest">Latest</option>
+                        <option value="oldest">Oldest</option>
+                      </>
+                    )}
+                    <option value="a-z">A-Z</option>
+                    <option value="z-a">Z-A</option>
+                  </select>
+                </div>
+              )}
             </div>
 
             <div className="relative flex-1 max-w-md mx-6">
@@ -184,7 +281,7 @@ export default function App() {
                 {/* Sub-Category Cards */}
                 {[
                   { name: 'Movies', icon: Play, count: MOVIES.length, desc: 'Cinematic journeys.' },
-                  { name: 'Games', icon: Gamepad2, count: 0, desc: 'Interactive worlds.' },
+                  { name: 'Games', icon: Gamepad2, count: games.length || '...', desc: 'Interactive worlds.' },
                   { name: 'Anime', icon: Sparkles, count: ANIME_DATA.length, desc: 'Hand-drawn dreams.' },
                   { name: 'Proxies', icon: Layers, count: 0, desc: 'Secure pathways.' },
                   { name: 'Music', icon: MusicIcon, count: 0, desc: 'Rhythmic escapes.' },
@@ -280,7 +377,135 @@ export default function App() {
               </motion.div>
             )}
 
-            {activeCategory !== 'Home' && activeCategory !== 'Movies' && activeCategory !== 'Anime' && (
+            {activeCategory === 'Games' && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-6">
+                <section className="pb-10">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="serif text-2xl font-semibold italic">Dominum Arcade</h2>
+                    <div className="text-xs text-imm-text/40">{filteredGames.length} titles found</div>
+                  </div>
+
+                  {isLoadingGames ? (
+                    <div className="py-20 text-center opacity-40">
+                      <Zap className="w-8 h-8 mx-auto mb-4 animate-spin" />
+                      <p className="font-serif italic text-lg">Synchronizing game archives...</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                      {filteredGames.length === 0 ? (
+                        <div className="col-span-full py-20 text-center border border-dashed border-imm-border rounded-3xl opacity-40">
+                          <Coffee className="w-8 h-8 mx-auto mb-4" />
+                          <p className="font-serif italic text-lg">No games matching your phase...</p>
+                        </div>
+                      ) : (
+                        filteredGames.map((game, index) => (
+                          <motion.div
+                            key={game.id}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: index * 0.02 }}
+                            onClick={() => setSelectedGame(game)}
+                            className="group bg-imm-card border border-imm-border aspect-square rounded-2xl flex flex-col items-center justify-center p-4 text-center hover:border-imm-accent transition-all cursor-pointer relative overflow-hidden active:scale-95"
+                          >
+                            {game.image && !erroredImages.has(game.id) ? (
+                              <>
+                                <img 
+                                  src={game.image} 
+                                  alt={game.name} 
+                                  onError={() => setErroredImages(prev => new Set(prev).add(game.id))}
+                                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                                  referrerPolicy="no-referrer" 
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-3 text-left">
+                                  <div className="text-[9px] font-bold text-white uppercase tracking-wider line-clamp-2 leading-tight mb-1">
+                                    {game.name}
+                                  </div>
+                                  <div className="text-[7px] text-imm-accent font-bold uppercase tracking-[0.2em]">
+                                    {game.provider}
+                                  </div>
+                                </div>
+                              </>
+                            ) : (
+                              <>
+                                <div className="absolute inset-0 bg-imm-accent/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                <Gamepad2 className="w-6 h-6 text-imm-accent mb-3 opacity-40 group-hover:opacity-100 transition-all group-hover:scale-110" />
+                                <div className="text-[10px] font-bold text-white uppercase tracking-wider line-clamp-2 leading-tight">
+                                  {game.name}
+                                </div>
+                                <div className="mt-2 text-[8px] text-imm-text/40 uppercase tracking-widest">
+                                  {game.provider}
+                                </div>
+                              </>
+                            )}
+                          </motion.div>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </section>
+              </motion.div>
+            )}
+
+            {activeCategory === 'Proxies' && (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }} 
+                animate={{ opacity: 1, y: 0 }}
+                className="flex-1"
+              >
+                <div className="mb-12">
+                  <h2 className="serif text-5xl italic mb-4">Proxy Portals</h2>
+                  <p className="text-imm-text/40 font-light max-w-xl italic text-lg leading-relaxed">
+                    A collection of secure gateways designed for seamless, unrestricted access. Select a group to explore available mirrors.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {PROXY_GROUPS.map((group, index) => (
+                    <motion.div
+                      key={group.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y:0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="group bg-imm-sidebar p-8 rounded-[2.5rem] border border-imm-border hover:border-imm-accent transition-all relative overflow-hidden"
+                    >
+                      <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-20 transition-opacity">
+                        <Shield className="w-12 h-12 text-imm-accent" />
+                      </div>
+                      <div className="relative z-10">
+                        <div className="w-12 h-12 bg-imm-accent/10 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-imm-accent group-hover:text-black transition-all">
+                          <Globe className="w-6 h-6" />
+                        </div>
+                        <h3 className="serif text-2xl mb-2">{group.name}</h3>
+                        <p className="text-sm text-imm-text/40 mb-6 font-light">{group.description}</p>
+                        
+                        <div className="space-y-2">
+                          {group.links.length > 0 ? (
+                            group.links.map(link => (
+                              <a 
+                                key={link.id}
+                                href={link.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center justify-between p-3 bg-white/5 rounded-xl text-xs hover:bg-imm-accent hover:text-black transition-all group/link"
+                              >
+                                <span>{link.name}</span>
+                                <ExternalLink className="w-3 h-3 opacity-40 group-hover/link:opacity-100" />
+                              </a>
+                            ))
+                          ) : (
+                            <div className="p-3 border border-dashed border-imm-border rounded-xl text-[10px] text-imm-text/20 uppercase tracking-widest text-center">
+                              Coming Soon
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {activeCategory !== 'Home' && activeCategory !== 'Movies' && activeCategory !== 'Anime' && activeCategory !== 'TV Shows' && activeCategory !== 'Games' && activeCategory !== 'Proxies' && (
               <motion.div 
                 initial={{ opacity: 0, y: 20 }} 
                 animate={{ opacity: 1, y: 0 }}
@@ -336,15 +561,106 @@ export default function App() {
                     <div className="text-imm-accent font-bold">98%</div>
                   </div>
                 </div>
-                <div className="flex space-x-3">
-                  <button onClick={() => handleWatch(selectedMovie)} className="flex-1 bg-imm-accent text-black py-4 rounded-full font-bold hover:bg-imm-accent-hover transition-all flex items-center justify-center space-x-3">
-                    <Play className="w-5 h-5 fill-current" />
-                    <span>Open in Google Drive</span>
+                <div className="flex flex-col gap-3">
+                  {selectedMovie.links ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {selectedMovie.links.map((link, idx) => (
+                        <button 
+                          key={idx}
+                          onClick={() => {
+                            setClickCounts(prev => ({ ...prev, [selectedMovie.id]: (prev[selectedMovie.id] || 0) + 1 }));
+                            window.open(link.url, '_blank');
+                          }} 
+                          className="bg-imm-card border border-imm-border text-imm-text py-3 px-4 rounded-xl font-medium hover:bg-imm-accent hover:text-black transition-all flex items-center justify-between group"
+                        >
+                          <span>{link.part}</span>
+                          <Play className="w-4 h-4 opacity-40 group-hover:opacity-100 fill-current" />
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex space-x-3">
+                      <button onClick={() => handleWatch(selectedMovie)} className="flex-1 bg-imm-accent text-black py-4 rounded-full font-bold hover:bg-imm-accent-hover transition-all flex items-center justify-center space-x-3">
+                        <Play className="w-5 h-5 fill-current" />
+                        <span>Open in Google Drive</span>
+                      </button>
+                      <button className="px-6 bg-imm-card text-imm-text rounded-full border border-imm-border hover:bg-black/40 transition-all">
+                        <Heart className="w-5 h-5" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      {/* Game Player Modal */}
+      <AnimatePresence>
+        {selectedGame && (
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }} 
+            className="fixed inset-0 z-[70] flex items-center justify-center bg-black/90 backdrop-blur-xl"
+          >
+            <div className="absolute inset-0" onClick={() => setSelectedGame(null)} />
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0 }} 
+              animate={{ scale: 1, opacity: 1 }} 
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="relative w-full max-w-6xl h-[85vh] bg-imm-sidebar border border-imm-border rounded-[2.5rem] overflow-hidden flex flex-col shadow-2xl"
+            >
+              <div className="h-16 shrink-0 bg-black/40 border-b border-imm-border flex items-center justify-between px-8">
+                <div className="flex items-center gap-4">
+                  <Gamepad2 className="w-5 h-5 text-imm-accent" />
+                  <h3 className="serif text-lg font-bold text-white uppercase tracking-widest">{selectedGame.name}</h3>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => {
+                      const blankWin = window.open('about:blank', '_blank');
+                      if (blankWin) {
+                        const doc = blankWin.document;
+                        doc.open();
+                        doc.write(`
+                          <!DOCTYPE html>
+                          <html>
+                          <head>
+                            <title>Google Drive</title>
+                            <link rel="icon" href="https://ssl.gstatic.com/docs/doclist/images/drive_2022q3_32dp.png">
+                            <style>
+                              body, html { margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden; background: #000; }
+                              iframe { width: 100%; height: 100%; border: none; }
+                            </style>
+                          </head>
+                          <body>
+                            <iframe src="${selectedGame.url}"></iframe>
+                          </body>
+                          </html>
+                        `);
+                        doc.close();
+                      }
+                    }}
+                    title="Open in about:blank tab"
+                    className="p-2 hover:bg-white/10 rounded-lg transition-colors text-imm-text/60 hover:text-imm-accent"
+                  >
+                    <Layers className="w-4 h-4" />
                   </button>
-                  <button className="px-6 bg-imm-card text-imm-text rounded-full border border-imm-border hover:bg-black/40 transition-all">
-                    <Heart className="w-5 h-5" />
+                  <button 
+                    onClick={() => setSelectedGame(null)}
+                    className="p-2 hover:bg-white/10 rounded-lg transition-colors text-imm-text/60 hover:text-imm-text"
+                  >
+                    <X className="w-5 h-5" />
                   </button>
                 </div>
+              </div>
+              <div className="flex-1 bg-black relative">
+                <iframe 
+                  src={selectedGame.url} 
+                  className="w-full h-full border-none" 
+                  allowFullScreen
+                />
               </div>
             </motion.div>
           </motion.div>
