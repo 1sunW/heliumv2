@@ -24,7 +24,9 @@ import {
   Ghost,
   Shield,
   ExternalLink,
-  Globe
+  Globe,
+  Check,
+  CheckCircle2
 } from 'lucide-react';
 
 type CategoryType = 'Home' | 'Movies' | 'Games' | 'Anime' | 'Proxies' | 'Music' | 'TV Shows' | 'Books' | 'Hacks' | 'Extra';
@@ -33,11 +35,19 @@ export default function App() {
   const [activeCategory, setActiveCategory] = useState<CategoryType>('Home');
   const [selectedMovie, setSelectedMovie] = useState<ContentItem | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [activeView, setActiveView] = useState<'discovery' | 'library'>('discovery');
+  const [activeView, setActiveView] = useState<'discovery' | 'watchlist' | 'library'>('discovery');
   const [libraryIds, setLibraryIds] = useState<string[]>([]);
+  const [watchedIds, setWatchedIds] = useState<string[]>([]);
   const [clickCounts, setClickCounts] = useState<Record<string, number>>({});
   const [searchQuery, setSearchQuery] = useState('');
   
+  const handleCategorySelect = (category: CategoryType) => {
+    setActiveCategory(category);
+    if ((activeView === 'library' || activeView === 'watchlist') && category !== 'Movies' && category !== 'Anime' && category !== 'TV Shows') {
+      setActiveView('discovery');
+    }
+  };
+
   // Games state
   const [games, setGames] = useState<GameItem[]>([]);
   const [selectedProvider, setSelectedProvider] = useState(GAME_PROVIDERS[0].id);
@@ -86,9 +96,6 @@ export default function App() {
       ...prev,
       [movie.id]: (prev[movie.id] || 0) + 1
     }));
-    if (!libraryIds.includes(movie.id)) {
-      setLibraryIds(prev => [...prev, movie.id]);
-    }
     
     // Open the drive link if it exists, otherwise fallback to a search
     const link = movie.driveLink || `https://www.google.com/search?q=${encodeURIComponent(movie.title)}+google+drive+link`;
@@ -96,17 +103,33 @@ export default function App() {
     console.log(`Opening ${movie.title} link...`);
   };
 
+  const toggleLibrary = (id: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setLibraryIds(prev => 
+      prev.includes(id) ? prev.filter(libId => libId !== id) : [...prev, id]
+    );
+  };
+
+  const toggleWatched = (id: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setWatchedIds(prev => 
+      prev.includes(id) ? prev.filter(wId => wId !== id) : [...prev, id]
+    );
+  };
+
   const allItems = [...MOVIES, ...ANIME_DATA, ...TV_SHOWS];
 
-  const displayedItems = activeView === 'library' 
+  const displayedItems = activeView === 'watchlist' 
     ? allItems.filter(m => libraryIds.includes(m.id))
-    : activeCategory === 'Movies' 
-      ? allItems.filter(item => item.type === 'movie')
-      : activeCategory === 'Anime' 
-        ? allItems.filter(item => item.type === 'anime')
-        : activeCategory === 'TV Shows'
-          ? allItems.filter(item => item.type === 'tv')
-          : [];
+    : activeView === 'library'
+      ? allItems.filter(m => watchedIds.includes(m.id))
+      : activeCategory === 'Movies' 
+        ? allItems.filter(item => item.type === 'movie')
+        : activeCategory === 'Anime' 
+          ? allItems.filter(item => item.type === 'anime')
+          : activeCategory === 'TV Shows'
+            ? allItems.filter(item => item.type === 'tv')
+            : [];
 
   const filteredItems = displayedItems.filter(item => 
     item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -115,6 +138,57 @@ export default function App() {
   );
 
   const categories: CategoryType[] = ['Home', 'Movies', 'Games', 'Anime', 'Proxies', 'Music', 'TV Shows', 'Books', 'Hacks', 'Extra'];
+
+  const renderMovieCard = (item: ContentItem, index: number) => (
+    <motion.div
+      key={item.id}
+      layout
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.1 }}
+      onClick={() => {
+        setSelectedMovie(item);
+      }}
+      className="group cursor-pointer"
+    >
+      <div className="aspect-[3/4] rounded-2xl bg-imm-card border border-imm-border mb-3 overflow-hidden relative movie-card-hover">
+        <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" referrerPolicy="no-referrer" />
+        <div className={`absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent flex items-end justify-between p-4 transition-opacity ${libraryIds.includes(item.id) || watchedIds.includes(item.id) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+          <div className="flex flex-col gap-1 text-white">
+            <div className="flex items-center gap-2 text-xs font-bold">
+              <Star className="w-3 h-3 text-imm-accent fill-current" /> {item.rating} Rating
+            </div>
+            {clickCounts[item.id] > 0 && (
+              <div className="text-[10px] opacity-70 underline decoration-imm-accent/40">{clickCounts[item.id]} focus visits</div>
+            )}
+          </div>
+          <div className="flex flex-col gap-2">
+            <button 
+              title={libraryIds.includes(item.id) ? "Remove from Watchlist" : "Add to Watchlist"}
+              onClick={(e) => toggleLibrary(item.id, e)}
+              className={`p-2 rounded-full ${libraryIds.includes(item.id) ? 'bg-imm-accent text-black' : 'bg-black/60 text-white hover:bg-imm-accent hover:text-black'} backdrop-blur-md transition-colors border border-white/10`}
+            >
+              <Heart className={`w-4 h-4 ${libraryIds.includes(item.id) ? 'fill-current' : ''}`} />
+            </button>
+            {(activeView === 'library' || activeView === 'watchlist') && (
+              <button
+                title={watchedIds.includes(item.id) ? "Mark as Unwatched" : "Mark as Watched"}
+                onClick={(e) => toggleWatched(item.id, e)}
+                className={`p-2 rounded-full ${watchedIds.includes(item.id) ? 'bg-green-500/90 text-white' : 'bg-black/60 text-white hover:bg-green-500 hover:text-white'} backdrop-blur-md transition-colors border border-white/10`}
+              >
+                {watchedIds.includes(item.id) ? <CheckCircle2 className="w-4 h-4" /> : <Check className="w-4 h-4" />}
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+      <div className="text-sm font-semibold group-hover:text-imm-accent transition-colors flex items-center justify-between">
+        <span className="truncate pr-2">{item.title}</span>
+        {watchedIds.includes(item.id) && <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0" />}
+      </div>
+      <div className="text-xs opacity-50 mt-0.5">{item.duration} • {item.year}</div>
+    </motion.div>
+  );
 
   return (
     <div className="flex flex-col h-screen w-screen border-imm-border border-8 box-border overflow-hidden selection:bg-imm-accent/30 bg-imm-bg">
@@ -128,7 +202,7 @@ export default function App() {
           {categories.map((cat) => (
             <button
               key={cat}
-              onClick={() => setActiveCategory(cat)}
+              onClick={() => handleCategorySelect(cat)}
               className={`text-[10px] uppercase tracking-[0.2em] transition-all whitespace-nowrap px-1 py-1 border-b-2 ${activeCategory === cat ? 'text-imm-accent border-imm-accent font-bold' : 'text-imm-text/40 border-transparent hover:text-imm-text/80'}`}
             >
               {cat}
@@ -139,7 +213,7 @@ export default function App() {
 
       <div className="flex flex-1 overflow-hidden relative">
         {/* Sidebar Navigation (Context Sensitive) */}
-        {(activeCategory === 'Movies' || activeCategory === 'Home' || activeCategory === 'Anime' || activeCategory === 'TV Shows') && (
+        {(activeCategory === 'Movies' || activeCategory === 'Anime' || activeCategory === 'TV Shows') && (
           <aside className="hidden lg:flex w-64 bg-imm-sidebar border-r border-imm-border flex-col p-8 z-20">
             <div className="flex items-center gap-3 mb-10">
               <span className="text-[10px] uppercase tracking-widest text-imm-accent/60 font-bold">Navigation</span>
@@ -154,10 +228,16 @@ export default function App() {
                   <HomeIcon className="w-4 h-4" /> Discovery
                 </li>
                 <li 
+                  className={`cursor-pointer transition-colors flex items-center gap-3 ${activeView === 'watchlist' ? 'text-imm-accent font-semibold' : 'hover:text-imm-text'}`}
+                  onClick={() => setActiveView('watchlist')}
+                >
+                  <Heart className="w-4 h-4" /> My Watchlist ({libraryIds.length})
+                </li>
+                <li 
                   className={`cursor-pointer transition-colors flex items-center gap-3 ${activeView === 'library' ? 'text-imm-accent font-semibold' : 'hover:text-imm-text'}`}
                   onClick={() => setActiveView('library')}
                 >
-                  <Heart className="w-4 h-4" /> My Library ({libraryIds.length})
+                  <CheckCircle2 className="w-4 h-4" /> My Library ({watchedIds.length})
                 </li>
               </ul>
               
@@ -246,9 +326,15 @@ export default function App() {
             </div>
 
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-full border-2 border-imm-accent/30 p-0.5">
-                <div className="w-full h-full rounded-full bg-gradient-to-br from-imm-accent to-[#4c1d95]"></div>
-              </div>
+              <a 
+                href="https://discord.gg/3KDAKzBDg4"
+                target="_blank"
+                rel="noreferrer"
+                className="w-10 h-10 rounded-full border-2 border-[#5865F2]/50 p-0.5 flex items-center justify-center bg-gradient-to-br from-[#5865F2] to-[#4c1d95] hover:scale-105 hover:border-[#5865F2] transition-all cursor-pointer"
+                aria-label="Join Discord Server"
+              >
+                <i className="fa-brands fa-discord text-white text-lg"></i>
+              </a>
             </div>
           </header>
 
@@ -267,7 +353,7 @@ export default function App() {
                       Welcome to your personal hub. Explore cinema, discover hacks, browse anime, or just stay immersive. Everything you need, unified in one serene interface.
                     </p>
                     <button 
-                      onClick={() => setActiveCategory('Movies')}
+                      onClick={() => handleCategorySelect('Movies')}
                       className="bg-imm-accent text-black px-10 py-4 rounded-full font-bold text-sm hover:bg-imm-accent-hover transition-all"
                     >
                       Start Exploring
@@ -289,7 +375,7 @@ export default function App() {
                 ].map((item) => (
                   <div 
                     key={item.name}
-                    onClick={() => setActiveCategory(item.name as CategoryType)}
+                    onClick={() => handleCategorySelect(item.name as CategoryType)}
                     className="group bg-imm-sidebar border border-imm-border p-8 rounded-[2rem] hover:border-imm-accent transition-all cursor-pointer"
                   >
                     <item.icon className="w-8 h-8 text-imm-accent mb-6 opacity-60 group-hover:opacity-100 transition-opacity" />
@@ -300,7 +386,7 @@ export default function App() {
               </motion.div>
             )}
 
-            {(activeCategory === 'Movies' || activeCategory === 'Anime' || activeCategory === 'TV Shows' || activeView === 'library') && (
+            {(activeCategory === 'Movies' || activeCategory === 'Anime' || activeCategory === 'TV Shows') && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-10">
                 {/* Featured Spotlight (Only if Discovery) */}
                 {activeView === 'discovery' && activeCategory === 'Movies' && (
@@ -327,52 +413,107 @@ export default function App() {
                   </section>
                 )}
 
+                {/* Watchlist Header */}
+                {activeView === 'watchlist' && (
+                  <section className="relative h-64 shrink-0 rounded-3xl overflow-hidden border border-white/5 bg-imm-sidebar flex items-center">
+                    <div className="absolute inset-0 bg-gradient-to-br from-imm-accent/10 to-transparent"></div>
+                    <div className="absolute right-0 top-0 bottom-0 w-2/3 bg-gradient-to-l from-imm-card to-transparent opacity-50"></div>
+                    <div className="relative z-20 px-8 lg:px-12 max-w-2xl">
+                      <div className="flex items-center gap-4 mb-4">
+                        <Heart className="w-8 h-8 text-imm-accent fill-current drop-shadow-lg" />
+                        <h1 className="serif text-4xl lg:text-5xl font-bold text-white drop-shadow-md">My Watchlist</h1>
+                      </div>
+                      <p className="text-sm lg:text-base text-imm-text/80 leading-relaxed font-light italic mt-4 max-w-xl">
+                        Your curated collection of cinematic universes, animated dreams, and episodic journeys you want to explore.
+                      </p>
+                      <div className="mt-8 flex gap-4">
+                        <div className="bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-imm-border text-xs text-white font-bold tracking-widest shadow-inner">
+                          {libraryIds.length} {libraryIds.length === 1 ? 'TITLE' : 'TITLES'} SAVED
+                        </div>
+                      </div>
+                    </div>
+                    <div className="absolute right-10 top-1/2 -translate-y-1/2 opacity-10 blur-xl pointer-events-none">
+                      <Heart className="w-96 h-96 fill-current text-imm-accent" />
+                    </div>
+                  </section>
+                )}
+
+                {/* Library Header */}
+                {activeView === 'library' && (
+                  <section className="relative h-64 shrink-0 rounded-3xl overflow-hidden border border-white/5 bg-imm-sidebar flex items-center">
+                    <div className="absolute inset-0 bg-gradient-to-br from-[#10b981]/10 to-transparent"></div>
+                    <div className="absolute right-0 top-0 bottom-0 w-2/3 bg-gradient-to-l from-imm-card to-transparent opacity-50"></div>
+                    <div className="relative z-20 px-8 lg:px-12 max-w-2xl">
+                      <div className="flex items-center gap-4 mb-4">
+                        <CheckCircle2 className="w-8 h-8 text-[#10b981] drop-shadow-lg" />
+                        <h1 className="serif text-4xl lg:text-5xl font-bold text-white drop-shadow-md">My Library</h1>
+                      </div>
+                      <p className="text-sm lg:text-base text-imm-text/80 leading-relaxed font-light italic mt-4 max-w-xl">
+                        A retrospective of everything you've watched. Keep track of your completed cinematic journeys here.
+                      </p>
+                      <div className="mt-8 flex gap-4">
+                        <div className="bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-imm-border text-xs text-white font-bold tracking-widest shadow-inner">
+                          {watchedIds.length} {watchedIds.length === 1 ? 'TITLE' : 'TITLES'} FINISHED
+                        </div>
+                      </div>
+                    </div>
+                    <div className="absolute right-10 top-1/2 -translate-y-1/2 opacity-10 blur-xl pointer-events-none">
+                      <CheckCircle2 className="w-96 h-96 text-[#10b981]" />
+                    </div>
+                  </section>
+                )}
+
                 <section className="pb-10">
                   <div className="flex items-center justify-between mb-6">
                     <h2 className="serif text-2xl font-semibold">
-                      {activeView === 'library' ? 'My Library' : activeCategory === 'Anime' ? 'Trending Anime' : activeCategory === 'TV Shows' ? 'Episodic Journeys' : 'Curated Cozy Classics'}
+                      {activeView === 'watchlist' ? 'Saved Titles' : activeView === 'library' ? 'Completed Titles' : activeCategory === 'Anime' ? 'Trending Anime' : activeCategory === 'TV Shows' ? 'Episodic Journeys' : 'Curated Cozy Classics'}
                     </h2>
                   </div>
                   
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {filteredItems.length === 0 ? (
+                  {(activeView === 'library' || activeView === 'watchlist') ? (
+                    filteredItems.length === 0 ? (
                       <div className="col-span-full py-20 text-center border border-dashed border-imm-border rounded-3xl opacity-40">
-                        <Coffee className="w-8 h-8 mx-auto mb-4" />
-                        <p className="font-serif italic text-lg">No results found...</p>
+                        {activeView === 'watchlist' ? (
+                          <>
+                            <Heart className="w-8 h-8 mx-auto mb-4 opacity-50" />
+                            <p className="font-serif italic text-lg">Your watchlist is currently empty...</p>
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle2 className="w-8 h-8 mx-auto mb-4 opacity-50" />
+                            <p className="font-serif italic text-lg">You haven't marked any titles as watched yet...</p>
+                          </>
+                        )}
                       </div>
                     ) : (
-                      filteredItems.map((item, index) => (
-                        <motion.div
-                          key={item.id}
-                          layout
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: index * 0.1 }}
-                          onClick={() => {
-                            setClickCounts(prev => ({ ...prev, [item.id]: (prev[item.id] || 0) + 1 }));
-                            setSelectedMovie(item);
-                          }}
-                          className="group cursor-pointer"
-                        >
-                          <div className="aspect-[3/4] rounded-2xl bg-imm-card border border-imm-border mb-3 overflow-hidden relative movie-card-hover">
-                            <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" referrerPolicy="no-referrer" />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
-                              <div className="flex flex-col gap-1 text-white">
-                                <div className="flex items-center gap-2 text-xs font-bold">
-                                  <Star className="w-3 h-3 text-imm-accent fill-current" /> {item.rating} Rating
-                                </div>
-                                {clickCounts[item.id] > 0 && (
-                                  <div className="text-[10px] opacity-70 underline decoration-imm-accent/40">{clickCounts[item.id]} focus visits</div>
-                                )}
+                      <div className="flex flex-col gap-10">
+                        {['movie', 'tv', 'anime'].map(type => {
+                          const typeItems = filteredItems.filter(item => item.type === type);
+                          if (typeItems.length === 0) return null;
+                          const typeName = type === 'movie' ? 'Movies' : type === 'tv' ? 'TV Shows' : 'Anime';
+                          return (
+                            <div key={type}>
+                              <h3 className="serif text-xl font-medium mb-4 text-white/80 border-b border-imm-border pb-2">{typeName}</h3>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+                                {typeItems.map((item, index) => renderMovieCard(item, index))}
                               </div>
                             </div>
-                          </div>
-                          <div className="text-sm font-semibold group-hover:text-imm-accent transition-colors">{item.title}</div>
-                          <div className="text-xs opacity-50 mt-0.5">{item.duration} • {item.year}</div>
-                        </motion.div>
-                      ))
-                    )}
-                  </div>
+                          );
+                        })}
+                      </div>
+                    )
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+                      {filteredItems.length === 0 ? (
+                        <div className="col-span-full py-20 text-center border border-dashed border-imm-border rounded-3xl opacity-40">
+                          <Coffee className="w-8 h-8 mx-auto mb-4" />
+                          <p className="font-serif italic text-lg">No results found...</p>
+                        </div>
+                      ) : (
+                        filteredItems.map((item, index) => renderMovieCard(item, index))
+                      )}
+                    </div>
+                  )}
                 </section>
               </motion.div>
             )}
@@ -381,6 +522,7 @@ export default function App() {
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-6">
                 <section className="pb-10">
                   <div className="flex items-center justify-between mb-6">
+                    <h2 className="serif text-2xl font-semibold italic">Games</h2>
                     <div className="text-xs text-imm-text/40">{filteredGames.length} titles found</div>
                   </div>
 
@@ -524,7 +666,7 @@ export default function App() {
       {/* Movie Detail Modal */}
       <AnimatePresence>
         {selectedMovie && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[150] flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setSelectedMovie(null)} />
             <motion.div layoutId={selectedMovie.id} className="relative w-full max-w-5xl bg-imm-sidebar rounded-[2rem] overflow-hidden shadow-2xl flex flex-col md:flex-row max-h-[90vh] border border-imm-border">
               <button onClick={() => setSelectedMovie(null)} className="absolute top-6 right-6 z-10 p-2 bg-white/10 backdrop-blur rounded-full hover:bg-white/20 transition-all">
@@ -562,20 +704,42 @@ export default function App() {
                 </div>
                 <div className="flex flex-col gap-3">
                   {selectedMovie.links ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {selectedMovie.links.map((link, idx) => (
+                    <div className="flex flex-col gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {selectedMovie.links.map((link, idx) => (
+                          <button 
+                            key={idx}
+                            onClick={() => {
+                              setClickCounts(prev => ({ ...prev, [selectedMovie.id]: (prev[selectedMovie.id] || 0) + 1 }));
+                              window.open(link.url, '_blank');
+                            }} 
+                            className="bg-imm-card border border-imm-border text-imm-text py-3 px-4 rounded-xl font-medium hover:bg-imm-accent hover:text-black transition-all flex items-center justify-between group"
+                          >
+                            <span>{link.part}</span>
+                            <Play className="w-4 h-4 opacity-40 group-hover:opacity-100 fill-current" />
+                          </button>
+                        ))}
+                      </div>
+                      <div className="flex space-x-3 mt-2">
                         <button 
-                          key={idx}
-                          onClick={() => {
-                            setClickCounts(prev => ({ ...prev, [selectedMovie.id]: (prev[selectedMovie.id] || 0) + 1 }));
-                            window.open(link.url, '_blank');
-                          }} 
-                          className="bg-imm-card border border-imm-border text-imm-text py-3 px-4 rounded-xl font-medium hover:bg-imm-accent hover:text-black transition-all flex items-center justify-between group"
+                          onClick={() => toggleLibrary(selectedMovie.id)}
+                          title={libraryIds.includes(selectedMovie.id) ? "Remove from Watchlist" : "Add to Watchlist"}
+                          className={`flex-1 py-3 rounded-xl border border-imm-border hover:bg-black/40 transition-all flex items-center justify-center space-x-2
+                            ${libraryIds.includes(selectedMovie.id) ? 'bg-imm-accent/20 text-imm-accent' : 'bg-imm-card text-imm-text'}`}
                         >
-                          <span>{link.part}</span>
-                          <Play className="w-4 h-4 opacity-40 group-hover:opacity-100 fill-current" />
+                          <Heart className={`w-4 h-4 ${libraryIds.includes(selectedMovie.id) ? 'fill-current' : ''}`} />
+                          <span className="text-xs font-semibold uppercase tracking-widest">{libraryIds.includes(selectedMovie.id) ? 'Watchlisted' : 'Watchlist'}</span>
                         </button>
-                      ))}
+                        <button 
+                          onClick={() => toggleWatched(selectedMovie.id)}
+                          title={watchedIds.includes(selectedMovie.id) ? "Remove from Library" : "Add to Completed Library"}
+                          className={`flex-1 py-3 rounded-xl border border-imm-border hover:bg-black/40 transition-all flex items-center justify-center space-x-2
+                            ${watchedIds.includes(selectedMovie.id) ? 'bg-green-500/20 text-green-500' : 'bg-imm-card text-imm-text'}`}
+                        >
+                          <CheckCircle2 className="w-4 h-4" />
+                          <span className="text-xs font-semibold uppercase tracking-widest">{watchedIds.includes(selectedMovie.id) ? 'Finished' : 'Mark Finished'}</span>
+                        </button>
+                      </div>
                     </div>
                   ) : (
                     <div className="flex space-x-3">
@@ -583,8 +747,21 @@ export default function App() {
                         <Play className="w-5 h-5 fill-current" />
                         <span>Open in Google Drive</span>
                       </button>
-                      <button className="px-6 bg-imm-card text-imm-text rounded-full border border-imm-border hover:bg-black/40 transition-all">
-                        <Heart className="w-5 h-5" />
+                      <button 
+                        onClick={() => toggleLibrary(selectedMovie.id)}
+                        title={libraryIds.includes(selectedMovie.id) ? "Remove from Watchlist" : "Add to Watchlist"}
+                        className={`px-6 rounded-full border border-imm-border hover:bg-black/40 transition-all flex items-center justify-center
+                          ${libraryIds.includes(selectedMovie.id) ? 'bg-imm-accent/20 text-imm-accent' : 'bg-imm-card text-imm-text'}`}
+                      >
+                        <Heart className={`w-5 h-5 ${libraryIds.includes(selectedMovie.id) ? 'fill-current' : ''}`} />
+                      </button>
+                      <button 
+                        onClick={() => toggleWatched(selectedMovie.id)}
+                        title={watchedIds.includes(selectedMovie.id) ? "Remove from Library" : "Add to Completed Library"}
+                        className={`px-6 rounded-full border border-imm-border hover:bg-black/40 transition-all flex items-center justify-center
+                          ${watchedIds.includes(selectedMovie.id) ? 'bg-green-500/20 text-green-500' : 'bg-imm-card text-imm-text'}`}
+                      >
+                        <CheckCircle2 className={`w-5 h-5 ${watchedIds.includes(selectedMovie.id) ? '' : ''}`} />
                       </button>
                     </div>
                   )}
@@ -601,7 +778,7 @@ export default function App() {
             initial={{ opacity: 0 }} 
             animate={{ opacity: 1 }} 
             exit={{ opacity: 0 }} 
-            className="fixed inset-0 z-[70] flex items-center justify-center bg-black/90 backdrop-blur-xl"
+            className="fixed inset-0 z-[150] flex items-center justify-center bg-black/90 backdrop-blur-xl"
           >
             <div className="absolute inset-0" onClick={() => setSelectedGame(null)} />
             <motion.div 
