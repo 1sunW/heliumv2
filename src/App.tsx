@@ -381,7 +381,6 @@ export default function App() {
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-6">
                 <section className="pb-10">
                   <div className="flex items-center justify-between mb-6">
-                    <h2 className="serif text-2xl font-semibold italic">Dominum Arcade</h2>
                     <div className="text-xs text-imm-text/40">{filteredGames.length} titles found</div>
                   </div>
 
