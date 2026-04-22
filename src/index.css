@@ -1,0 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;600&family=Inter:wght@300;400;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Crimson Pro", serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  
+  --color-imm-bg: #07050a;
+  --color-imm-sidebar: #0b0714;
+  --color-imm-card: #120b21;
+  --color-imm-text: #f5f3ff;
+  --color-imm-border: #23163a;
+  --color-imm-accent: #a855f7;
+  --color-imm-accent-hover: #9333ea;
+}
+
+@layer base {
+  body {
+    @apply bg-imm-bg text-imm-text font-sans antialiased;
+  }
+  
+  h1, h2, h3, h4, .serif {
+    @apply font-serif;
+  }
+}
+
+@layer utilities {
+  .cozy-blur {
+    @apply backdrop-blur-md bg-[#0f0a1a]/70 border border-white/5;
+  }
+  
+  .glow-amber {
+    @apply shadow-[0_0_40px_rgba(168,85,247,0.15)];
+  }
+
+  .movie-card-hover {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:border-imm-accent;
+  }
+}
