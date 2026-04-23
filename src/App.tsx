@@ -1,6 +1,6 @@
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { MOVIES, ANIME_DATA, TV_SHOWS, PROXY_GROUPS, BOOKS, MANGA, type ContentItem, type ProxyGroup } from './data';
+import { MOVIES, ANIME_DATA, TV_SHOWS, PROXY_GROUPS, BOOKS, MANGA, WINDOWS_APPS, GIMKIT_HACKS, PARTNERS, type ContentItem, type ProxyGroup, type Partner } from './data';
 import { fetchGames, GAME_PROVIDERS, TRUFFLED_PROXIES, GAME_CATEGORIES, type GameItem } from './gameService';
 import { 
   Coffee, 
@@ -26,7 +26,10 @@ import {
   ExternalLink,
   Globe,
   Check,
-  CheckCircle2
+  CheckCircle2,
+  MessageSquare,
+  Wind,
+  Activity
 } from 'lucide-react';
 
 type CategoryType = 'Home' | 'Movies' | 'Games' | 'Anime' | 'Proxies' | 'Music' | 'TV Shows' | 'Books' | 'Hacks' | 'Extra';
@@ -40,10 +43,39 @@ export default function App() {
   const [watchedIds, setWatchedIds] = useState<string[]>([]);
   const [clickCounts, setClickCounts] = useState<Record<string, number>>({});
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Laptop Apps state
+  const [laptopSection, setLaptopSection] = useState<'working' | 'pending' | 'info' | 'methods'>('working');
+  const [activeMethod, setActiveMethod] = useState<{ title: string, steps: string[] } | null>(null);
+  const [activeExtra, setActiveExtra] = useState<{ title: string, content?: string, list?: string[], subtext?: string, partners?: Partner[] } | null>(null);
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
   
+  const LAPTOP_METHODS = [
+    { 
+      title: "Starting Method", 
+      steps: [
+        "1. Open Terminal.", 
+        "2. Click the Down Arrow at the top of the screen.", 
+        "3. Click 'Command Prompt'.", 
+        "4. Type the following commands: 'cd C:/Windows/Temp' and 'mkdir secret'",
+        "5. Open File Explorer.",
+        "6. At the top path bar, type: 'C:/Windows/Temp/secret'",
+        "7. Click the 3 dots and click 'Pin to Quick Access'.",
+        "8. Drag any executable file or game into the folder to run it."
+      ] 
+    },
+    { 
+      title: "Backup Method", 
+      steps: [
+        "1. Open the noadmin.bat link from the library (Search for it or check Google Drive).",
+        "2. Drag and drop any file and it will run as admin (Must be in secret folder).", 
+      ] 
+    }
+  ];
+
   const handleCategorySelect = (category: CategoryType) => {
     setActiveCategory(category);
-    if ((activeView === 'library' || activeView === 'watchlist') && category !== 'Movies' && category !== 'Anime' && category !== 'TV Shows' && category !== 'Books') {
+    if ((activeView === 'library' || activeView === 'watchlist') && category !== 'Movies' && category !== 'Anime' && category !== 'TV Shows' && category !== 'Books' && category !== 'Hacks') {
       setActiveView('discovery');
     }
   };
@@ -117,7 +149,7 @@ export default function App() {
     );
   };
 
-  const allItems = [...MOVIES, ...ANIME_DATA, ...TV_SHOWS, ...BOOKS, ...MANGA];
+  const allItems = [...MOVIES, ...ANIME_DATA, ...TV_SHOWS, ...BOOKS, ...MANGA, ...WINDOWS_APPS, ...GIMKIT_HACKS];
 
   const displayedItems = activeView === 'watchlist' 
     ? allItems.filter(m => libraryIds.includes(m.id))
@@ -129,9 +161,11 @@ export default function App() {
           ? allItems.filter(item => item.type === 'anime')
           : activeCategory === 'TV Shows'
             ? allItems.filter(item => item.type === 'tv')
-            : (activeCategory === 'Books' && activeView !== 'library')
+            : activeCategory === 'Books'
               ? [...BOOKS, ...MANGA]
-              : [];
+              : activeCategory === 'Hacks'
+                ? [...WINDOWS_APPS, ...GIMKIT_HACKS]
+                : [];
 
   const filteredItems = displayedItems.filter(item => 
     item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -195,10 +229,9 @@ export default function App() {
   return (
     <div className="flex flex-col h-screen w-screen border-imm-border border-8 box-border overflow-hidden selection:bg-imm-accent/30 bg-imm-bg">
       {/* Top Category Bar */}
-      <div className="bg-imm-sidebar border-b border-imm-border shrink-0 flex items-center px-6 overflow-x-auto no-scrollbar py-3 gap-8 z-50">
-        <div className="flex items-center gap-2 mr-4 shrink-0">
-          <Play className="w-5 h-5 text-imm-accent fill-current" />
-          <span className="serif text-xl font-bold text-imm-accent">Helium</span>
+      <div className={`bg-imm-sidebar border-b border-imm-border shrink-0 flex items-center px-6 overflow-x-auto no-scrollbar py-3 gap-8 z-50 transition-opacity duration-300 ${selectedMovie || selectedGame || activeMethod || activeExtra ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+        <div className="mr-6 shrink-0">
+          <img src="https://raw.githubusercontent.com/1sunW/ICONS-FOR-LINKS/refs/heads/main/Helium-Logo.png" alt="Helium" className="h-12 w-auto" />
         </div>
         <div className="flex items-center gap-6">
           {categories.map((cat) => (
@@ -215,7 +248,7 @@ export default function App() {
 
       <div className="flex flex-1 overflow-hidden relative">
         {/* Sidebar Navigation (Context Sensitive) */}
-        {(activeCategory === 'Movies' || activeCategory === 'Anime' || activeCategory === 'TV Shows' || activeCategory === 'Books') && (
+        {(activeCategory === 'Movies' || activeCategory === 'Anime' || activeCategory === 'TV Shows' || activeCategory === 'Books' || activeCategory === 'Hacks') && (
           <aside className="hidden lg:flex w-64 bg-imm-sidebar border-r border-imm-border flex-col p-8 z-20">
             <div className="flex items-center gap-3 mb-10">
               <span className="text-[10px] uppercase tracking-widest text-imm-accent/60 font-bold">Navigation</span>
@@ -263,7 +296,7 @@ export default function App() {
           <div className="absolute top-0 right-0 w-96 h-96 bg-imm-accent/10 rounded-full blur-[150px] pointer-events-none"></div>
 
           {/* Header */}
-          <header className="h-20 shrink-0 px-6 lg:px-10 flex items-center justify-between border-b border-imm-border z-[100] sticky top-0 bg-imm-bg/95 backdrop-blur-md shadow-sm">
+          <header className={`h-20 shrink-0 px-6 lg:px-10 flex items-center justify-between border-b border-imm-border z-[100] sticky top-0 bg-imm-bg/95 backdrop-blur-md shadow-sm transition-opacity duration-300 ${selectedMovie || selectedGame || activeMethod || activeExtra ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
             <div className="flex items-center gap-4">
               <h2 className="serif text-xl tracking-wide">{activeCategory} View</h2>
               
@@ -465,11 +498,11 @@ export default function App() {
                   </section>
                 )}
 
-                {(activeCategory === 'Movies' || activeCategory === 'Anime' || activeCategory === 'TV Shows' || activeCategory === 'Books') && (
+                {(activeCategory === 'Movies' || activeCategory === 'Anime' || activeCategory === 'TV Shows' || activeCategory === 'Books' || activeCategory === 'Hacks') && (
                   <section className="pb-10">
                     <div className="flex items-center justify-between mb-6">
                       <h2 className="serif text-2xl font-semibold">
-                        {activeView === 'watchlist' ? 'Saved Titles' : activeView === 'library' ? 'Completed Titles' : activeCategory === 'Anime' ? 'Trending Anime' : activeCategory === 'TV Shows' ? 'Episodic Journeys' : activeCategory === 'Books' ? 'Library' : 'Curated Cozy Classics'}
+                        {activeView === 'watchlist' ? 'Saved Titles' : activeView === 'library' ? 'Completed Titles' : activeCategory === 'Anime' ? 'Trending Anime' : activeCategory === 'TV Shows' ? 'Episodic Journeys' : activeCategory === 'Books' ? 'Library' : activeCategory === 'Hacks' ? 'Hacker Resources' : 'Curated Cozy Classics'}
                       </h2>
                     </div>
                     
@@ -689,7 +722,215 @@ export default function App() {
               </motion.div>
             )}
 
-            {activeCategory !== 'Home' && activeCategory !== 'Movies' && activeCategory !== 'Anime' && activeCategory !== 'TV Shows' && activeCategory !== 'Games' && activeCategory !== 'Proxies' && activeCategory !== 'Music' && activeCategory !== 'Books' && (
+            {activeCategory === 'Hacks' && activeView === 'discovery' && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-10">
+                <section className="pb-10">
+                  <div className="flex flex-col gap-10">
+                    <div>
+                      <h3 className="serif text-xl font-medium mb-4 text-white/80 border-b border-imm-border pb-2">Apps for your Windows Laptop</h3>
+                      
+                      <div className="bg-imm-card rounded-3xl border border-imm-border overflow-hidden mb-10">
+                        <div className="flex bg-black/20 border-b border-imm-border p-2 gap-2">
+                          {(['working', 'pending', 'info', 'methods'] as const).map(section => (
+                            <button
+                              key={section}
+                              onClick={() => setLaptopSection(section)}
+                              className={`px-6 py-2 rounded-2xl text-[10px] uppercase font-bold tracking-widest transition-all ${laptopSection === section ? 'bg-imm-accent text-black' : 'text-imm-text/40 hover:text-imm-text/80'}`}
+                            >
+                              {section}
+                            </button>
+                          ))}
+                        </div>
+
+                        <div className="p-8">
+                          {laptopSection === 'working' && (
+                            <div className="overflow-x-auto">
+                              <table className="w-full text-left text-sm">
+                                <thead>
+                                  <tr className="border-b border-imm-border text-imm-text/40 uppercase text-[10px] tracking-widest">
+                                    <th className="pb-4 pt-2 px-4">App Name</th>
+                                    <th className="pb-4 pt-2 px-4">Status</th>
+                                    <th className="pb-4 pt-2 px-4">Performance</th>
+                                    <th className="pb-4 pt-2 px-4 text-right">Action</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {WINDOWS_APPS.filter(app => app.title.toLowerCase().includes(searchQuery.toLowerCase())).map(app => (
+                                    <tr key={app.id} className="border-b border-imm-border/50 hover:bg-white/5 transition-colors group">
+                                      <td className="py-4 px-4 font-medium">{app.title}</td>
+                                      <td className="py-4 px-4">
+                                        <span className={`px-2 py-1 rounded text-[10px] font-bold ${app.mood.includes('Admin') ? 'bg-orange-500/10 text-orange-400' : 'bg-green-500/10 text-green-400'}`}>
+                                          {app.mood.split(' / ')[0]}
+                                        </span>
+                                      </td>
+                                      <td className="py-4 px-4 text-imm-text/60">{app.mood.split(' / ')[1] || 'N/A'}</td>
+                                      <td className="py-4 px-4 text-right">
+                                        <button 
+                                          onClick={() => setSelectedMovie(app)}
+                                          className="p-2 rounded-full hover:bg-imm-accent hover:text-black transition-all text-imm-text/20 group-hover:text-imm-text"
+                                        >
+                                          <ExternalLink className="w-4 h-4" />
+                                        </button>
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          )}
+
+                          {laptopSection === 'pending' && (
+                            <div className="py-20 text-center opacity-40">
+                              <Clock className="w-12 h-12 mx-auto mb-4" />
+                              <p className="font-serif italic text-lg">No pending tasks. System stable.</p>
+                            </div>
+                          )}
+
+                          {laptopSection === 'info' && (
+                            <div className="space-y-8 max-w-2xl">
+                              <div>
+                                <h4 className="text-imm-accent font-bold uppercase tracking-widest text-[10px] mb-4">System Version</h4>
+                                <p className="text-3xl serif italic">v1.0.5</p>
+                              </div>
+                              <div className="grid grid-cols-2 gap-8">
+                                <div>
+                                  <h4 className="text-imm-text/40 font-bold uppercase tracking-widest text-[10px] mb-4">Status Key</h4>
+                                  <ul className="space-y-2 text-sm text-imm-text/60">
+                                    <li>• Working</li>
+                                    <li>• Requires Extra</li>
+                                    <li>• Requires Admin</li>
+                                    <li>• Dysfunctional</li>
+                                  </ul>
+                                </div>
+                                <div>
+                                  <h4 className="text-imm-text/40 font-bold uppercase tracking-widest text-[10px] mb-4">Performance Key</h4>
+                                  <ul className="space-y-2 text-sm text-imm-text/60">
+                                    <li>• Good</li>
+                                    <li>• Special Settings</li>
+                                    <li>• Low FPS / Very Low FPS</li>
+                                    <li>• HORRIBLE FPS</li>
+                                    <li>• Lag Spikes</li>
+                                  </ul>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {laptopSection === 'methods' && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {LAPTOP_METHODS.map((method, i) => (
+                                <button
+                                  key={method.title}
+                                  onClick={() => {
+                                    setActiveMethod(method);
+                                    setCurrentStepIndex(0);
+                                  }}
+                                  className="p-6 bg-imm-sidebar rounded-2xl border border-imm-border text-left hover:border-imm-accent transition-all group"
+                                >
+                                  <div className="flex items-center justify-between mb-4">
+                                    <div className="p-3 bg-imm-accent/10 rounded-xl group-hover:bg-imm-accent group-hover:text-black transition-colors">
+                                      <Play className="w-5 h-5 fill-current" />
+                                    </div>
+                                    <ChevronRight className="w-4 h-4 opacity-20 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                                  </div>
+                                  <h4 className="font-serif text-xl italic mb-2">{method.title}</h4>
+                                  <p className="text-xs text-imm-text/40">{method.steps.length} Steps to Success</p>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* We keep the grid below or hide it depending on preference, but for now let's keep it as secondary view or remove it to match the "EMBED THIS" request */}
+                    </div>
+                    <div>
+                      <h3 className="serif text-xl font-medium mb-4 text-white/80 border-b border-imm-border pb-2">Gimkit Hacks</h3>
+                      <div className="bg-imm-card rounded-3xl border border-imm-border overflow-hidden">
+                        <div className="p-8 overflow-x-auto">
+                          <table className="w-full text-left text-sm">
+                            <thead>
+                              <tr className="border-b border-imm-border text-imm-text/40 uppercase text-[10px] tracking-widest">
+                                <th className="pb-4 pt-2 px-4">Hack Name</th>
+                                <th className="pb-4 pt-2 px-4">Category</th>
+                                <th className="pb-4 pt-2 px-4 text-right">Action</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {GIMKIT_HACKS.filter(hack => hack.title.toLowerCase().includes(searchQuery.toLowerCase())).map(hack => (
+                                <tr key={hack.id} className="border-b border-imm-border/50 hover:bg-white/5 transition-colors group">
+                                  <td className="py-4 px-4 font-medium">{hack.title}</td>
+                                  <td className="py-4 px-4">
+                                    <span className="px-2 py-1 rounded text-[10px] font-bold bg-imm-accent/10 text-imm-accent border border-imm-accent/20">
+                                      {hack.genre[0] || 'Hack'}
+                                    </span>
+                                  </td>
+                                  <td className="py-4 px-4 text-right">
+                                    <button 
+                                      onClick={() => setSelectedMovie(hack)}
+                                      className="p-2 rounded-full hover:bg-imm-accent hover:text-black transition-all text-imm-text/20 group-hover:text-imm-text"
+                                    >
+                                      <ExternalLink className="w-4 h-4" />
+                                    </button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              </motion.div>
+            )}
+
+            {activeCategory === 'Extra' && (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }} 
+                animate={{ opacity: 1, y: 0 }}
+                className="flex-1 flex flex-col gap-10"
+              >
+                <div className="bg-imm-card border border-imm-border p-12 rounded-[2.5rem] relative overflow-hidden glow-amber">
+                  <div className="relative z-10">
+                    <h1 className="serif text-5xl mb-6 text-white italic tracking-tight">Extra Archives</h1>
+                    <p className="text-imm-text/70 text-lg font-light leading-relaxed mb-10 max-w-xl">
+                      Community resources, developer credits, and experimental portals. Explore the outer reaches of the Helium ecosystem.
+                    </p>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                      {[
+                        { title: 'Our Staff', icon: Shield, action: () => setActiveExtra({ title: 'Our Staff', content: 'Ace', subtext: 'Owner' }) },
+                        { title: 'Partners', icon: Globe, action: () => setActiveExtra({ title: 'Partners', partners: PARTNERS }) },
+                        { title: 'Requests', icon: MessageSquare, action: () => window.open('https://docs.google.com/forms/d/e/1FAIpQLSfa3NfgBDgXeHHOugtGK9ilhmxeBUtKGowdGwMf8-p4I-huEg/viewform?usp=sharing&ouid=109958091358583321640', '_blank') },
+                        { title: 'Info', icon: Info, action: () => setActiveExtra({ title: 'System Status', content: 'We are hearing about a rumor that you can\'t access the movies. "The number of allowed playback" or something like that. New method: Exit the tab, wait for 2 minutes, and come back on to the movie.' }) },
+                        { title: 'Leaks', icon: Zap, action: () => setActiveExtra({ title: 'Deep Leaks', content: 'New theme?' }) },
+                        { title: 'Credits', icon: Sparkles, action: () => setActiveExtra({ title: 'Helium Credits', content: 'Thank you P-Stream, Chill Zone, M3T4L, Ultimate Game Stash (UGS), and Chill Kirb Central.' }) },
+                        { title: 'Air', icon: Wind },
+                        { title: 'Hydrogen', icon: Activity },
+                        { title: 'Eaglercraft', icon: Gamepad2 }
+                      ].map((btn) => (
+                        <button
+                          key={btn.title}
+                          onClick={btn.action}
+                          className="flex items-center gap-4 p-6 bg-imm-sidebar/50 border border-imm-border rounded-2xl hover:border-imm-accent hover:bg-imm-card transition-all group text-left"
+                        >
+                          <div className="p-3 bg-imm-accent/10 rounded-xl group-hover:bg-imm-accent/20 transition-colors">
+                            {btn.icon ? <btn.icon className="w-5 h-5 text-imm-accent" /> : <Layers className="w-5 h-5 text-imm-accent" />}
+                          </div>
+                          <span className="font-semibold text-imm-text group-hover:text-white transition-colors">{btn.title}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="absolute top-0 right-0 p-12 opacity-5">
+                    <Sparkles className="w-64 h-64" />
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {activeCategory !== 'Home' && activeCategory !== 'Movies' && activeCategory !== 'Anime' && activeCategory !== 'TV Shows' && activeCategory !== 'Games' && activeCategory !== 'Proxies' && activeCategory !== 'Music' && activeCategory !== 'Books' && activeCategory !== 'Hacks' && activeCategory !== 'Extra' && (
               <motion.div 
                 initial={{ opacity: 0, y: 20 }} 
                 animate={{ opacity: 1, y: 0 }}
@@ -706,20 +947,174 @@ export default function App() {
         </main>
       </div>
 
+      {/* Laptop Methods Modal */}
+      <AnimatePresence>
+        {activeMethod && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setActiveMethod(null)}
+              className="absolute inset-0 bg-black/80 backdrop-blur-md"
+            />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="relative w-full max-w-md bg-imm-card border border-imm-border rounded-[2.5rem] overflow-hidden shadow-2xl"
+            >
+              <div className="p-8">
+                <div className="flex items-center justify-between mb-8">
+                  <h3 className="serif text-3xl italic">{activeMethod.title}</h3>
+                  <button onClick={() => setActiveMethod(null)} className="p-2 hover:bg-white/5 rounded-full text-imm-text/40 transition-colors">
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="min-h-[160px] flex items-center justify-center text-center p-6 bg-black/20 rounded-3xl border border-imm-border/50 mb-8">
+                  <motion.p
+                    key={currentStepIndex}
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="text-lg font-light leading-relaxed"
+                  >
+                    {activeMethod.steps[currentStepIndex]}
+                  </motion.p>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={() => setCurrentStepIndex(prev => Math.max(0, prev - 1))}
+                    disabled={currentStepIndex === 0}
+                    className="flex-1 py-4 bg-imm-sidebar text-imm-text rounded-2xl border border-imm-border disabled:opacity-20 hover:bg-white/5 transition-all text-xs uppercase font-bold tracking-widest"
+                  >
+                    Prev
+                  </button>
+                  <button
+                    onClick={() => setCurrentStepIndex(prev => Math.min(activeMethod.steps.length - 1, prev + 1))}
+                    disabled={currentStepIndex === activeMethod.steps.length - 1}
+                    className="flex-1 py-4 bg-imm-accent text-black rounded-2xl disabled:opacity-20 hover:brightness-110 transition-all text-xs uppercase font-bold tracking-widest"
+                  >
+                    Next
+                  </button>
+                </div>
+                
+                <div className="mt-6 flex justify-center gap-1">
+                  {activeMethod.steps.map((_, i) => (
+                    <div key={i} className={`h-1 rounded-full transition-all ${i === currentStepIndex ? 'w-4 bg-imm-accent' : 'w-1 bg-white/10'}`} />
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Extra Info Modal */}
+      <AnimatePresence>
+        {activeExtra && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setActiveExtra(null)}
+              className="absolute inset-0 bg-black/80 backdrop-blur-md"
+            />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className={`relative w-full ${activeExtra.partners ? 'max-w-2xl' : 'max-w-sm'} bg-imm-card border border-imm-border rounded-[2.5rem] overflow-hidden shadow-2xl`}
+            >
+              <div className="p-10 flex flex-col items-center">
+                <div className="flex items-center justify-between w-full mb-8">
+                  <h3 className="serif text-xs uppercase tracking-[0.3em] text-imm-accent font-bold opacity-60">Archive Detail</h3>
+                  <button onClick={() => setActiveExtra(null)} className="p-2 hover:bg-white/5 rounded-full text-imm-text/40 transition-colors">
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="mb-8 w-full">
+                   <h2 className={`serif text-4xl italic mb-6 text-center ${activeExtra.title === 'Partners' ? 'text-purple-400 font-bold not-italic' : ''}`}>{activeExtra.title}</h2>
+                   
+                   {activeExtra.content && (
+                     <p className="text-lg font-light leading-relaxed text-imm-text/80 italic text-center">
+                       {activeExtra.content}
+                     </p>
+                   )}
+
+                   {activeExtra.subtext && (
+                     <p className="mt-2 text-[10px] uppercase tracking-[0.2em] font-bold text-imm-accent text-center">
+                       {activeExtra.subtext}
+                     </p>
+                   )}
+
+                   {activeExtra.list && (
+                     <div className="flex flex-col gap-3 mt-4 text-center">
+                       {activeExtra.list.map((item, i) => (
+                         <div key={i} className="serif text-xl opacity-60 hover:opacity-100 transition-opacity">
+                           {item}
+                         </div>
+                       ))}
+                     </div>
+                   )}
+
+                   {activeExtra.partners && (
+                     <div className="flex flex-col gap-4 mt-6 max-h-[50vh] overflow-y-auto no-scrollbar pr-2">
+                       {activeExtra.partners.map((partner) => (
+                         <div 
+                          key={partner.id} 
+                          onClick={() => partner.link !== '#' && window.open(partner.link, '_blank')}
+                          className={`flex items-center gap-6 p-6 rounded-[1.5rem] bg-[#16162a] border border-white/5 hover:border-purple-500/30 transition-all ${partner.link !== '#' ? 'cursor-pointer hover:bg-[#1c1c35] translate-hover shadow-xl' : ''}`}
+                         >
+                           <div className="w-16 h-16 rounded-full overflow-hidden shrink-0 border-2 border-purple-500/20">
+                             <img src={partner.logo} alt={partner.name} className="w-full h-full object-cover" />
+                           </div>
+                           <div className="flex flex-col gap-1 text-left">
+                             <h4 className="serif text-2xl text-purple-400 tracking-wide font-bold">{partner.name}</h4>
+                             <div className="text-[10px] uppercase tracking-widest text-[#5de4ff] font-bold">
+                               Owned by: <span className="opacity-80 font-medium">{partner.owner}</span>
+                             </div>
+                             <p className="text-sm text-imm-text/60 mt-1 line-clamp-1 italic font-light">
+                               {partner.description}
+                             </p>
+                           </div>
+                         </div>
+                       ))}
+                     </div>
+                   )}
+                </div>
+
+                <button 
+                  onClick={() => setActiveExtra(null)}
+                  className="w-full py-4 bg-imm-accent text-black rounded-2xl font-bold uppercase text-[10px] tracking-[0.2em] hover:brightness-110 transition-all mt-4"
+                >
+                  Close Archive
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* Movie Detail Modal */}
       <AnimatePresence>
         {selectedMovie && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[200] flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setSelectedMovie(null)} />
             <motion.div layoutId={selectedMovie.id} className="relative w-full max-w-5xl bg-imm-sidebar rounded-[2rem] overflow-hidden shadow-2xl flex flex-col md:flex-row max-h-[90vh] border border-imm-border">
               <button onClick={() => setSelectedMovie(null)} className="absolute top-6 right-6 z-10 p-2 bg-white/10 backdrop-blur rounded-full hover:bg-white/20 transition-all">
                 <X className="w-5 h-5 text-imm-text" />
               </button>
-              <div className="w-full md:w-1/2 relative h-64 md:h-auto overflow-hidden">
-                <img src={selectedMovie.image} alt={selectedMovie.title} className="w-full h-full object-cover scale-110" referrerPolicy="no-referrer" />
-                <div className="absolute inset-0 bg-gradient-to-t from-imm-sidebar via-transparent to-transparent md:bg-gradient-to-r" />
-              </div>
-              <div className="w-full md:w-1/2 p-8 lg:p-12 overflow-y-auto">
+              {selectedMovie.type !== 'hack' && (
+                <div className="w-full md:w-1/2 relative h-64 md:h-auto overflow-hidden">
+                  <img src={selectedMovie.image} alt={selectedMovie.title} className="w-full h-full object-cover scale-110" referrerPolicy="no-referrer" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-imm-sidebar via-transparent to-transparent md:bg-gradient-to-r" />
+                </div>
+              )}
+              <div className={`w-full ${selectedMovie.type === 'hack' ? 'md:w-full' : 'md:w-1/2'} p-8 lg:p-12 overflow-y-auto`}>
                 <div className="flex items-center space-x-2 text-imm-accent mb-4">
                   <Star className="w-4 h-4 fill-current" />
                   <span className="text-sm font-semibold tracking-wider">{selectedMovie.rating} Rating</span>
@@ -784,7 +1179,7 @@ export default function App() {
                           }} 
                           className="flex-1 bg-imm-accent text-black py-4 rounded-full font-bold hover:bg-imm-accent-hover transition-all flex items-center justify-center space-x-3"
                         >
-                          {selectedMovie.type === 'book' || selectedMovie.type === 'manga' ? <BookOpen className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current" />}
+                          {selectedMovie.type === 'book' || selectedMovie.type === 'manga' ? <BookOpen className="w-5 h-5 fill-current" /> : selectedMovie.type === 'hack' ? <Zap className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current" />}
                           <span>Open in Google Drive</span>
                         </button>
                       ) : (
@@ -824,7 +1219,7 @@ export default function App() {
             initial={{ opacity: 0 }} 
             animate={{ opacity: 1 }} 
             exit={{ opacity: 0 }} 
-            className="fixed inset-0 z-[150] flex items-center justify-center bg-black/90 backdrop-blur-xl"
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/90 backdrop-blur-xl"
           >
             <div className="absolute inset-0" onClick={() => setSelectedGame(null)} />
             <motion.div 

@@ -8,10 +8,324 @@ export interface ContentItem {
   genre: string[];
   image: string;
   mood: string;
-  type: 'movie' | 'anime' | 'tv' | 'book' | 'manga';
+  type: 'movie' | 'anime' | 'tv' | 'book' | 'manga' | 'hack';
   driveLink?: string;
   links?: { part: string; url: string; }[];
 }
+
+export interface Partner {
+  id: string;
+  name: string;
+  owner: string;
+  description: string;
+  link: string;
+  logo: string;
+}
+
+export const WINDOWS_APPS: ContentItem[] = [
+  {
+    id: "wa-easyfun",
+    title: "Easyfun",
+    description: "Cloud gaming platform (Needs Admin / Low FPS).",
+    year: "2024",
+    rating: "4.2",
+    duration: "N/A",
+    genre: ["Cloud Gaming", "Utility"],
+    image: "",
+    mood: "Requires Admin",
+    type: "hack",
+    driveLink: "https://drive.google.com/file/d/1zJTfvTvbK4EuCS_n8yT5W9zsvELCeRh4/view?usp=drive_link"
+  },
+  {
+    id: "wa-roblox",
+    title: "Roblox",
+    description: "Multiplayer gaming platform (Must be reinstalled every update / Lag Spikes).",
+    year: "2024",
+    rating: "4.5",
+    duration: "N/A",
+    genre: ["Gaming", "Social"],
+    image: "",
+    mood: "Requires Extra",
+    type: "hack",
+    driveLink: "https://drive.google.com/file/d/1FogXqY_BSlPhYH58WCu14uTmBvR8lYcs/view?usp=sharing"
+  },
+  {
+    id: "wa-gd",
+    title: "Geometry Dash",
+    description: "Jump and fly your way through danger in this rhythm-based action platformer.",
+    year: "2013",
+    rating: "4.8",
+    duration: "N/A",
+    genre: ["Platformer", "Rhythm"],
+    image: "",
+    mood: "Working / Good",
+    type: "hack",
+    driveLink: "https://drive.google.com/file/d/1hQaBshEa1lMjKkoH0X3sbBeWJ4aCVgYo/view?usp=sharing"
+  },
+  {
+    id: "wa-undertale",
+    title: "Undertale",
+    description: "The RPG game where you don't have to destroy anyone.",
+    year: "2015",
+    rating: "4.9",
+    duration: "N/A",
+    genre: ["RPG", "Indie"],
+    image: "",
+    mood: "Working / Good",
+    type: "hack",
+    driveLink: "https://drive.google.com/drive/folders/1BHwUZC81xqwtAMcCYKDVmHIFQJF5_vPq?usp=sharing"
+  },
+  {
+    id: "wa-clustertruck",
+    title: "Clustertruck",
+    description: "A chaotic physics-based truck platformer.",
+    year: "2016",
+    rating: "4.3",
+    duration: "N/A",
+    genre: ["Action", "Platformer"],
+    image: "",
+    mood: "Working / Very Low FPS",
+    type: "hack",
+    driveLink: "https://drive.google.com/drive/folders/14vqCtbwG3dIbDlIeCSE_y1nfpEzFNrxB?usp=drive_link"
+  },
+  {
+    id: "wa-hk",
+    title: "Hollow Knight",
+    description: "Forge your own path in Hollow Knight! An epic action adventure through a vast ruined kingdom.",
+    year: "2017",
+    rating: "4.9",
+    duration: "N/A",
+    genre: ["Metroidvania", "Indie"],
+    image: "",
+    mood: "Working / Low FPS",
+    type: "hack",
+    driveLink: "https://buzzheavier.com/ibozyrc7vpjq"
+  },
+  {
+    id: "wa-kindergarten",
+    title: "Kindergarten",
+    description: "Kindergarten is an abstract-puzzle adventure game.",
+    year: "2017",
+    rating: "4.4",
+    duration: "N/A",
+    genre: ["Adventure", "Puzzle"],
+    image: "",
+    mood: "Working / Good",
+    type: "hack",
+    driveLink: "https://drive.google.com/drive/folders/1P_8nNSzvUNLotEDrHDZRQBs7aeE_HWcU?usp=drive_link"
+  },
+  {
+    id: "wa-vvvvvv",
+    title: "VVVVVV",
+    description: "A retro-styled 2D puzzle platformer.",
+    year: "2010",
+    rating: "4.6",
+    duration: "N/A",
+    genre: ["Platformer", "Puzzle"],
+    image: "",
+    mood: "Working / Good",
+    type: "hack",
+    driveLink: "https://drive.google.com/file/d/0B-QJJrpqaROPel9LanZyYmtLSmM/view?usp=drive_link&resourcekey=0--DDAIXdP_KtBfQI6dhP2lA"
+  },
+  {
+    id: "wa-anydesk",
+    title: "AnyDesk",
+    description: "Fast Remote Desktop Software.",
+    year: "2024",
+    rating: "4.0",
+    duration: "N/A",
+    genre: ["Utility", "Remote"],
+    image: "",
+    mood: "Working",
+    type: "hack",
+    driveLink: "https://drive.google.com/file/d/12H1dI-8HDtCzbEi3FQbdtvTahjpwALD9/view?usp=sharing"
+  },
+  {
+    id: "wa-portal2",
+    title: "Portal 2",
+    description: "Puzzle-platform game developed and published by Valve.",
+    year: "2011",
+    rating: "4.9",
+    duration: "N/A",
+    genre: ["Puzzle", "Sci-Fi"],
+    image: "",
+    mood: "Working / Very Low FPS",
+    type: "hack",
+    driveLink: "https://drive.google.com/file/d/13Oh288efXlWF6zAuSbeZ2p-rxn9VeVCF/view?usp=drive_link"
+  },
+  {
+    id: "wa-hl2",
+    title: "Half-Life 2",
+    description: "Science fiction first-person shooter game developed and published by Valve Corporation.",
+    year: "2004",
+    rating: "4.9",
+    duration: "N/A",
+    genre: ["Action", "FPS"],
+    image: "",
+    mood: "Working / Good",
+    type: "hack",
+    driveLink: "https://drive.google.com/file/d/0B8OJSszLgRGmemtFX2g2TDVxS3c/view?usp=drive_link&resourcekey=0-nRdLPlr93XUMO5k889uvfQ"
+  },
+  {
+    id: "wa-ultrakill",
+    title: "ULTRAKILL",
+    description: "A fast-paced ultraviolent retro FPS.",
+    year: "2020",
+    rating: "4.9",
+    duration: "N/A",
+    genre: ["FPS", "Action"],
+    image: "",
+    mood: "Working / Low FPS",
+    type: "hack",
+    driveLink: "https://buzzheavier.com/4ebhy1j0u32u"
+  },
+  {
+    id: "wa-deltarune",
+    title: "Deltarune",
+    description: "The next game by the creator of Undertale.",
+    year: "2018",
+    rating: "4.9",
+    duration: "N/A",
+    genre: ["RPG", "Indie"],
+    image: "",
+    mood: "Working / Good",
+    type: "hack",
+    driveLink: "https://buzzheavier.com/x75d4eybqwaw"
+  },
+  {
+    id: "wa-gfn",
+    title: "GeForce NOW",
+    description: "NVIDIA's cloud-based game streaming service.",
+    year: "2024",
+    rating: "4.7",
+    duration: "N/A",
+    genre: ["Cloud Gaming", "Utility"],
+    image: "",
+    mood: "Working / Good",
+    type: "hack",
+    driveLink: "https://drive.google.com/file/d/1sKIFdkDb-AB49pZKuKD9QbahaWQ1lMxC/view?usp=drive_link"
+  },
+  {
+    id: "wa-spotify",
+    title: "Spotify",
+    description: "Digital music, podcast, and video service (Needs Admin / Low FPS).",
+    year: "2024",
+    rating: "4.5",
+    duration: "N/A",
+    genre: ["Music", "Utility"],
+    image: "",
+    mood: "Requires Admin",
+    type: "hack",
+    driveLink: "https://drive.google.com/file/d/1oCOuavSpuRJ7BdxHjZc6Wi7HZXTlWae1/view?usp=drive_link"
+  },
+  {
+    id: "wa-winrar",
+    title: "WinRar",
+    description: "A trialware file archiver utility (Needs Admin).",
+    year: "2024",
+    rating: "4.8",
+    duration: "N/A",
+    genre: ["Utility", "Compression"],
+    image: "",
+    mood: "Requires Admin",
+    type: "hack",
+    driveLink: "https://drive.google.com/file/d/1bnNwrQ0lvN39iqWxtqQFdm3yz2LbBEiI/view?usp=drive_link"
+  },
+  {
+    id: "wa-sklauncher",
+    title: "SKLauncher",
+    description: "Minecraft Launcher (Working / Low FPS).",
+    year: "2024",
+    rating: "4.6",
+    duration: "N/A",
+    genre: ["Gaming", "Launcher"],
+    image: "",
+    mood: "Working / Low FPS",
+    type: "hack",
+    driveLink: "https://pixeldrain.com/u/JWqeJnVM"
+  },
+  {
+    id: "wa-noita",
+    title: "Noita",
+    description: "A magical action roguelite set in a world where every pixel is physically simulated.",
+    year: "2020",
+    rating: "4.8",
+    duration: "N/A",
+    genre: ["Roguelite", "Indie"],
+    image: "",
+    mood: "Unknown",
+    type: "hack",
+    driveLink: "https://pixeldrain.com/u/MYikVAmY"
+  },
+  {
+    id: "wa-noadmin",
+    title: "noadmin.bat",
+    description: "Run any file as administrator without admin credentials (Must be in secret folder).",
+    year: "2024",
+    rating: "5.0",
+    duration: "v1.0",
+    genre: ["Utility", "Script"],
+    image: "",
+    mood: "Working / System",
+    type: "hack",
+    driveLink: "https://drive.google.com/file/d/1IShFMhvuziGYvVmTpqTI1yU6TR_CArv_/view?usp=sharing"
+  }
+];
+
+export const GIMKIT_HACKS: ContentItem[] = [
+  {
+    id: "gh1",
+    title: "Get Cash",
+    description: "Instantly add cash to your Gimkit game session.",
+    year: "2024",
+    rating: "5.0",
+    duration: "v1.0",
+    genre: ["Gimkit", "Utility"],
+    image: "",
+    mood: "Fast",
+    type: "hack",
+    driveLink: "https://drive.google.com/file/d/10gk6PJevSxixQWVwCWkMgYra7HkULx_C/view?usp=sharing"
+  },
+  {
+    id: "gh2",
+    title: "Show Correct Answers",
+    description: "Highlights the correct answer for every question.",
+    year: "2024",
+    rating: "5.0",
+    duration: "v1.0",
+    genre: ["Gimkit", "Insight"],
+    image: "",
+    mood: "Smart",
+    type: "hack",
+    driveLink: "https://drive.google.com/file/d/17XX8JGD8ENLmSjlzEwpHNQpfmKfOiLs2/view?usp=sharing"
+  },
+  {
+    id: "gh3",
+    title: "Free Premium",
+    description: "Unlocks premium Gimkit features temporarily.",
+    year: "2024",
+    rating: "4.8",
+    duration: "v1.0",
+    genre: ["Gimkit", "Unlock"],
+    image: "",
+    mood: "Elite",
+    type: "hack",
+    driveLink: "https://drive.google.com/file/d/1e1zbAtGNakBsqGK3Hqg1PStEOWp7udrN/view?usp=sharing"
+  },
+  {
+    id: "gh4",
+    title: "Answer Bot",
+    description: "An automated bot that answers questions for you.",
+    year: "2024",
+    rating: "4.9",
+    duration: "v1.2",
+    genre: ["Gimkit", "Bot"],
+    image: "",
+    mood: "Automatic",
+    type: "hack",
+    driveLink: "https://drive.google.com/file/d/1ZEygGXOjRlpXkQrpna-Bw5dwdqoWuRch/view?usp=sharing"
+  }
+];
 
 export const BOOKS: ContentItem[] = [
   {
@@ -7527,4 +7841,63 @@ export const PROXY_GROUPS: ProxyGroup[] = [
   { id: 'rammerhead', name: 'Rammerhead', description: 'Blazing fast.', links: [] },
   { id: 'axiom', name: 'Axiom', description: 'Self-evident truth.', links: [] },
   { id: 'fern', name: 'Fern', description: 'Ancient growth.', links: [] },
+];
+
+export const PARTNERS: Partner[] = [
+  {
+    id: 'p4',
+    name: "Dominum Network",
+    owner: "Dominum",
+    description: "Premium unblocked gaming network.",
+    link: "https://dominum.global.ssl.fastly.net/",
+    logo: "https://raw.githubusercontent.com/1sunW/ICONS-FOR-LINKS/refs/heads/main/Dominum-Network"
+  },
+  {
+    id: 'p5',
+    name: "M3T4L",
+    owner: "St4tue",
+    description: "Heavy metal gaming experience.",
+    link: "https://sites.google.com/view/m3t4l",
+    logo: "https://raw.githubusercontent.com/1sunW/ICONS-FOR-LINKS/refs/heads/main/M3T4L.png"
+  },
+  {
+    id: 'p6',
+    name: "ChillZone",
+    owner: "ohsols",
+    description: "The ultimate chill gaming spot.",
+    link: "https://chillz0ne.dev",
+    logo: "https://raw.githubusercontent.com/1sunW/ICONS-FOR-LINKS/refs/heads/main/CHILLZONE.png"
+  },
+  {
+    id: 'p7',
+    name: "Chill Kirb Central",
+    owner: "samtheskeleton.",
+    description: "Kirby-themed gaming hub.",
+    link: "https://sites.google.com/view/fus3-bomb/page",
+    logo: "https://raw.githubusercontent.com/1sunW/ICONS-FOR-LINKS/refs/heads/main/Chill-Kirb-Central"
+  },
+  {
+    id: 'p8',
+    name: "XPulse Games",
+    owner: "Luke",
+    description: "High-octane gaming pulsated for you.",
+    link: "https://sites.google.com/view/xpulsegames",
+    logo: "https://raw.githubusercontent.com/1sunW/ICONS-FOR-LINKS/refs/heads/main/xpulse.png"
+  },
+  {
+    id: 'p9',
+    name: "Axiom",
+    owner: "sd_inf",
+    description: "The universal truth of gaming.",
+    link: "https://discord.gg/A2AZb8SgCD",
+    logo: "https://raw.githubusercontent.com/1sunW/ICONS-FOR-LINKS/refs/heads/main/axiom.png"
+  },
+  {
+    id: 'p10',
+    name: "Axis",
+    owner: "decayed",
+    description: "Centered around gaming excellence.",
+    link: "https://axiseducation.one",
+    logo: "https://raw.githubusercontent.com/1sunW/ICONS-FOR-LINKS/refs/heads/main/axis.png"
+  }
 ];
