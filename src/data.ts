@@ -8,10 +8,237 @@ export interface ContentItem {
   genre: string[];
   image: string;
   mood: string;
-  type: 'movie' | 'anime' | 'tv';
+  type: 'movie' | 'anime' | 'tv' | 'book' | 'manga';
   driveLink?: string;
   links?: { part: string; url: string; }[];
 }
+
+export const BOOKS: ContentItem[] = [
+  {
+    id: "b1",
+    title: "Fourth Wing",
+    description: "A dragon rider fantasy.",
+    year: "2023",
+    rating: "4.8",
+    duration: "528 pages",
+    genre: ["Fantasy", "Romance"],
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSaLEof5b3VY-DrcrDyTExYWBTMq2fx43OSWXnffsaPn3zsRyt2fK02JK_zbwaBrEgF1kSV7qSuXSYWz3IUTvCh7C874BLs_d1PfDFn3g&s=10",
+    mood: "Epic",
+    type: "book",
+    driveLink: "https://drive.google.com/file/d/1KJlSxRyW5oBq1R1MHUNdVCcAzB_bBoNv/view"
+  },
+  {
+    id: "b2",
+    title: "Beach Read",
+    description: "Two writers spend a summer in neighboring beach houses.",
+    year: "2020",
+    rating: "4.3",
+    duration: "384 pages",
+    genre: ["Romance", "Contemporary"],
+    image: "https://m.media-amazon.com/images/I/71kdiN5Y1YL._AC_UF350,350_QL50_.jpg",
+    mood: "Cozy",
+    type: "book",
+    driveLink: "https://drive.google.com/file/d/1A39i9oTu_gcK-_i_t5XnDneDftb_gQrU/view"
+  },
+  {
+    id: "b3",
+    title: "One of Us is Lying",
+    description: "Five students walk into detention. Only four walk out alive.",
+    year: "2017",
+    rating: "4.2",
+    duration: "360 pages",
+    genre: ["Mystery", "Young Adult"],
+    image: "https://m.media-amazon.com/images/I/914W0VECGCL._AC_UF1000,1000_QL80_.jpg",
+    mood: "Suspense",
+    type: "book",
+    driveLink: "https://drive.google.com/file/d/1l2Mqe3WZQhU1L44Q61X7Olg9pBQgG15u/view?usp=drive_open"
+  },
+  {
+    id: "b4",
+    title: "One of Us is Next",
+    description: "A continuation of the Bayview High mysteries.",
+    year: "2020",
+    rating: "4.0",
+    duration: "384 pages",
+    genre: ["Mystery", "Young Adult"],
+    image: "https://m.media-amazon.com/images/I/81g28sg5WTL._AC_UF1000,1000_QL80_.jpg",
+    mood: "Suspense",
+    type: "book",
+    driveLink: "https://drive.google.com/file/d/1RKLZmD8W8MnQAr_i_3pAS7JM4o13gu7O/view"
+  },
+  {
+    id: "b5",
+    title: "Butcher and Blackbird",
+    description: "A dark romance.",
+    year: "2023",
+    rating: "4.5",
+    duration: "400 pages",
+    genre: ["Romance", "Dark"],
+    image: "https://m.media-amazon.com/images/I/81INidls6eL._AC_UF1000,1000_QL80_.jpg",
+    mood: "Thrilling",
+    type: "book",
+    driveLink: "http://drive.google.com/file/d/1GseXi1n_Qf6ekX21M91-xnmTQYE8G6zD/view?usp=drive_open"
+  },
+  {
+    id: "b6",
+    title: "Deeplight",
+    description: "A fantasy novel of sea monsters and scavengers.",
+    year: "2019",
+    rating: "4.1",
+    duration: "432 pages",
+    genre: ["Fantasy", "Young Adult"],
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_wgVnOTyullsc1Lkrf2DQ-BoQfklDzxBiFTScu_ROsk8unDhiywObPXsPKI0oFTXfBpP_cdMXdyKywGXSPnmgDJPbHcJVxnI-l_8aauE&s=10",
+    mood: "Adventure",
+    type: "book",
+    driveLink: "https://drive.google.com/file/d/1T7BE6lQhUmvYbZKJ-bT7JspVO28ziU-6/view"
+  },
+  {
+    id: "b7",
+    title: "Iron Flame",
+    description: "The sequel to Fourth Wing.",
+    year: "2023",
+    rating: "4.7",
+    duration: "640 pages",
+    genre: ["Fantasy", "Romance"],
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHv-7Y8Hz2B8sIYXs1mNa5mnYDRgVCGLrpQz3lRIVqOJgNQP5rEpUC5M5GIDYDKksCT-fxvTrsFPEp6zd6UuwI9MjDuMjDx9WsYeU7SCA&s=10",
+    mood: "Epic",
+    type: "book",
+    driveLink: "https://drive.google.com/file/d/12GIKOP81PWnshLVWMOOiZdtcL4QMDis_/view?usp=drive_open"
+  },
+  {
+    id: "b8",
+    title: "Onyx Storm",
+    description: "The third book in the Empyrean series.",
+    year: "2024",
+    rating: "4.9",
+    duration: "700 pages",
+    genre: ["Fantasy", "Romance"],
+    image: "https://upload.wikimedia.org/wikipedia/en/9/9d/Onyx_Storm_cover.jpg",
+    mood: "Epic",
+    type: "book",
+    driveLink: "https://drive.google.com/file/d/1KWWr5JXs2U79XfbJdhBu-e-LjEXRvSW6/view"
+  }
+];
+
+export const MANGA: ContentItem[] = [
+  {
+    id: "ma1",
+    title: "Sakamoto Days",
+    description: "An ex-hitman tries to live a peaceful life running a convenience store.",
+    year: "2020",
+    rating: "4.8",
+    duration: "Ongoing",
+    genre: ["Action", "Comedy"],
+    image: "https://upload.wikimedia.org/wikipedia/en/c/c8/Sakamoto_Days_manga_volume_1.jpg",
+    mood: "Exciting",
+    type: "manga",
+    driveLink: "https://drive.google.com/drive/u/0/folders/19DUxPkVk-4ixzNcLMIMjiQS5Zs6aCm7T"
+  },
+  {
+    id: "ma2",
+    title: "Demon Slayer",
+    description: "A young boy fights demons to save his sister.",
+    year: "2016",
+    rating: "4.9",
+    duration: "23 Volumes",
+    genre: ["Action", "Supernatural"],
+    image: "https://upload.wikimedia.org/wikipedia/en/thumb/0/09/Demon_Slayer_-_Kimetsu_no_Yaiba%2C_volume_1.jpg/250px-Demon_Slayer_-_Kimetsu_no_Yaiba%2C_volume_1.jpg",
+    mood: "Epic",
+    type: "manga",
+    driveLink: "https://drive.google.com/drive/u/0/folders/1mmBVdj-oKIC0aSdOcMcEnQ129-rKimKo"
+  },
+  {
+    id: "ma3",
+    title: "Chainsaw Man",
+    description: "A boy merges with a chainsaw demon.",
+    year: "2018",
+    rating: "4.7",
+    duration: "Ongoing",
+    genre: ["Action", "Horror"],
+    image: "https://upload.wikimedia.org/wikipedia/en/thumb/2/24/Chainsawman.jpg/250px-Chainsawman.jpg",
+    mood: "Dark",
+    type: "manga",
+    driveLink: "https://drive.google.com/drive/u/0/folders/16KZIqJMkvzHeX8TsP_tOoLHSoqJwuWYf"
+  },
+  {
+    id: "ma4",
+    title: "Blue Lock",
+    description: "A rigorous soccer training program aims to create the world's greatest striker.",
+    year: "2018",
+    rating: "4.8",
+    duration: "Ongoing",
+    genre: ["Sports", "Drama"],
+    image: "https://upload.wikimedia.org/wikipedia/en/c/c6/Blue_Lock_manga_volume_1.png",
+    mood: "Intense",
+    type: "manga",
+    driveLink: "https://drive.google.com/drive/u/0/folders/1hcGBwfdgJchkPlZMX55YF52aZRNdbXW9"
+  },
+  {
+    id: "ma5",
+    title: "Attack On Titan",
+    description: "Humanity fights for survival against giant man-eating humanoids.",
+    year: "2009",
+    rating: "4.9",
+    duration: "34 Volumes",
+    genre: ["Action", "Dark Fantasy"],
+    image: "https://m.media-amazon.com/images/I/81qPzeEO5IL._AC_UF1000,1000_QL80_.jpg",
+    mood: "Dark",
+    type: "manga",
+    driveLink: "https://drive.google.com/drive/u/0/folders/1B46EboOes_-kq6jvdL1KSFAhrFMNk4Lj"
+  },
+  {
+    id: "ma6",
+    title: "Solo Leveling",
+    description: "The weakest hunter becomes the strongest.",
+    year: "2018",
+    rating: "4.9",
+    duration: "14 Volumes",
+    genre: ["Action", "Fantasy"],
+    image: "https://upload.wikimedia.org/wikipedia/en/6/6c/Solo_Leveling_Volume_1_Cover.jpg",
+    mood: "Epic",
+    type: "manga",
+    driveLink: "https://drive.google.com/drive/u/0/folders/12tApujIKnQjaSlTRchrO0AZ8WhvhaNtl"
+  },
+  {
+    id: "ma7",
+    title: "Berserk",
+    description: "The Black Swordsman's quest for revenge.",
+    year: "1989",
+    rating: "5.0",
+    duration: "Ongoing",
+    genre: ["Action", "Dark Fantasy"],
+    image: "https://upload.wikimedia.org/wikipedia/en/4/4a/Berserk_vol01.png",
+    mood: "Dark",
+    type: "manga",
+    driveLink: "https://drive.google.com/drive/u/0/folders/14Ri_EP2Q6HxWJQbU97ZEAjSc9MfTmKI3"
+  },
+  {
+    id: "ma8",
+    title: "Dragon Ball Super",
+    description: "Goku's adventures continue.",
+    year: "2015",
+    rating: "4.5",
+    duration: "Ongoing",
+    genre: ["Action", "Sci-Fi"],
+    image: "https://m.media-amazon.com/images/I/81S8xoiksVL._AC_UF1000,1000_QL80_.jpg",
+    mood: "Action",
+    type: "manga",
+    driveLink: "http://drive.google.com/drive/u/0/folders/1iSzHqkCiW5S44-_97x_6x_pTTMJrPrMH"
+  },
+  {
+    id: "ma9",
+    title: "Naruto",
+    description: "A young ninja seeks recognition and dreams of becoming the Hokage.",
+    year: "1999",
+    rating: "4.8",
+    duration: "72 Volumes",
+    genre: ["Action", "Adventure"],
+    image: "https://upload.wikimedia.org/wikipedia/en/9/94/NarutoCoverTankobon1.jpg",
+    mood: "Inspiring",
+    type: "manga",
+    driveLink: "http://drive.google.com/drive/u/0/folders/1dHK5v5NZNiDvlQ9VK06AAPFNngnkkQCZ"
+  }
+];
 
 export const MOVIES: ContentItem[] = [
     {

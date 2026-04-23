@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { MOVIES, ANIME_DATA, TV_SHOWS, PROXY_GROUPS, type ContentItem, type ProxyGroup } from './data';
+import { MOVIES, ANIME_DATA, TV_SHOWS, PROXY_GROUPS, BOOKS, MANGA, type ContentItem, type ProxyGroup } from './data';
 import { fetchGames, GAME_PROVIDERS, TRUFFLED_PROXIES, GAME_CATEGORIES, type GameItem } from './gameService';
 import { 
   Coffee, 
@@ -43,14 +43,14 @@ export default function App() {
   
   const handleCategorySelect = (category: CategoryType) => {
     setActiveCategory(category);
-    if ((activeView === 'library' || activeView === 'watchlist') && category !== 'Movies' && category !== 'Anime' && category !== 'TV Shows') {
+    if ((activeView === 'library' || activeView === 'watchlist') && category !== 'Movies' && category !== 'Anime' && category !== 'TV Shows' && category !== 'Books') {
       setActiveView('discovery');
     }
   };
 
   // Games state
   const [games, setGames] = useState<GameItem[]>([]);
-  const [selectedProvider, setSelectedProvider] = useState(GAME_PROVIDERS[0].id);
+  const [selectedProvider, setSelectedProvider] = useState(GAME_PROVIDERS[1].id);
   const [selectedProxy, setSelectedProxy] = useState(TRUFFLED_PROXIES[0].url);
   const [selectedGameCategory, setSelectedGameCategory] = useState('');
   const [sortMethod, setSortMethod] = useState('a-z');
@@ -117,7 +117,7 @@ export default function App() {
     );
   };
 
-  const allItems = [...MOVIES, ...ANIME_DATA, ...TV_SHOWS];
+  const allItems = [...MOVIES, ...ANIME_DATA, ...TV_SHOWS, ...BOOKS, ...MANGA];
 
   const displayedItems = activeView === 'watchlist' 
     ? allItems.filter(m => libraryIds.includes(m.id))
@@ -129,7 +129,9 @@ export default function App() {
           ? allItems.filter(item => item.type === 'anime')
           : activeCategory === 'TV Shows'
             ? allItems.filter(item => item.type === 'tv')
-            : [];
+            : (activeCategory === 'Books' && activeView !== 'library')
+              ? [...BOOKS, ...MANGA]
+              : [];
 
   const filteredItems = displayedItems.filter(item => 
     item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -213,7 +215,7 @@ export default function App() {
 
       <div className="flex flex-1 overflow-hidden relative">
         {/* Sidebar Navigation (Context Sensitive) */}
-        {(activeCategory === 'Movies' || activeCategory === 'Anime' || activeCategory === 'TV Shows') && (
+        {(activeCategory === 'Movies' || activeCategory === 'Anime' || activeCategory === 'TV Shows' || activeCategory === 'Books') && (
           <aside className="hidden lg:flex w-64 bg-imm-sidebar border-r border-imm-border flex-col p-8 z-20">
             <div className="flex items-center gap-3 mb-10">
               <span className="text-[10px] uppercase tracking-widest text-imm-accent/60 font-bold">Navigation</span>
@@ -386,7 +388,7 @@ export default function App() {
               </motion.div>
             )}
 
-            {(activeCategory === 'Movies' || activeCategory === 'Anime' || activeCategory === 'TV Shows') && (
+            {(activeCategory === 'Movies' || activeCategory === 'Anime' || activeCategory === 'TV Shows' || (activeCategory === 'Books' && activeView !== 'discovery')) && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-10">
                 {/* Featured Spotlight (Only if Discovery) */}
                 {activeView === 'discovery' && activeCategory === 'Movies' && (
@@ -463,58 +465,60 @@ export default function App() {
                   </section>
                 )}
 
-                <section className="pb-10">
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="serif text-2xl font-semibold">
-                      {activeView === 'watchlist' ? 'Saved Titles' : activeView === 'library' ? 'Completed Titles' : activeCategory === 'Anime' ? 'Trending Anime' : activeCategory === 'TV Shows' ? 'Episodic Journeys' : 'Curated Cozy Classics'}
-                    </h2>
-                  </div>
-                  
-                  {(activeView === 'library' || activeView === 'watchlist') ? (
-                    filteredItems.length === 0 ? (
-                      <div className="col-span-full py-20 text-center border border-dashed border-imm-border rounded-3xl opacity-40">
-                        {activeView === 'watchlist' ? (
-                          <>
-                            <Heart className="w-8 h-8 mx-auto mb-4 opacity-50" />
-                            <p className="font-serif italic text-lg">Your watchlist is currently empty...</p>
-                          </>
-                        ) : (
-                          <>
-                            <CheckCircle2 className="w-8 h-8 mx-auto mb-4 opacity-50" />
-                            <p className="font-serif italic text-lg">You haven't marked any titles as watched yet...</p>
-                          </>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="flex flex-col gap-10">
-                        {['movie', 'tv', 'anime'].map(type => {
-                          const typeItems = filteredItems.filter(item => item.type === type);
-                          if (typeItems.length === 0) return null;
-                          const typeName = type === 'movie' ? 'Movies' : type === 'tv' ? 'TV Shows' : 'Anime';
-                          return (
-                            <div key={type}>
-                              <h3 className="serif text-xl font-medium mb-4 text-white/80 border-b border-imm-border pb-2">{typeName}</h3>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
-                                {typeItems.map((item, index) => renderMovieCard(item, index))}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )
-                  ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
-                      {filteredItems.length === 0 ? (
+                {(activeCategory === 'Movies' || activeCategory === 'Anime' || activeCategory === 'TV Shows' || activeCategory === 'Books') && (
+                  <section className="pb-10">
+                    <div className="flex items-center justify-between mb-6">
+                      <h2 className="serif text-2xl font-semibold">
+                        {activeView === 'watchlist' ? 'Saved Titles' : activeView === 'library' ? 'Completed Titles' : activeCategory === 'Anime' ? 'Trending Anime' : activeCategory === 'TV Shows' ? 'Episodic Journeys' : activeCategory === 'Books' ? 'Library' : 'Curated Cozy Classics'}
+                      </h2>
+                    </div>
+                    
+                    {(activeView === 'library' || activeView === 'watchlist') ? (
+                      filteredItems.length === 0 ? (
                         <div className="col-span-full py-20 text-center border border-dashed border-imm-border rounded-3xl opacity-40">
-                          <Coffee className="w-8 h-8 mx-auto mb-4" />
-                          <p className="font-serif italic text-lg">No results found...</p>
+                          {activeView === 'watchlist' ? (
+                            <>
+                              <Heart className="w-8 h-8 mx-auto mb-4 opacity-50" />
+                              <p className="font-serif italic text-lg">Your watchlist is currently empty...</p>
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircle2 className="w-8 h-8 mx-auto mb-4 opacity-50" />
+                              <p className="font-serif italic text-lg">You haven't marked any titles as watched yet...</p>
+                            </>
+                          )}
                         </div>
                       ) : (
-                        filteredItems.map((item, index) => renderMovieCard(item, index))
-                      )}
-                    </div>
-                  )}
-                </section>
+                        <div className="flex flex-col gap-10">
+                          {['movie', 'tv', 'anime', 'book', 'manga'].map(type => {
+                            const typeItems = filteredItems.filter(item => item.type === type);
+                            if (typeItems.length === 0) return null;
+                            const typeName = type === 'movie' ? 'Movies' : type === 'tv' ? 'TV Shows' : type === 'anime' ? 'Anime' : type === 'book' ? 'Books' : 'Manga';
+                            return (
+                              <div key={type}>
+                                <h3 className="serif text-xl font-medium mb-4 text-white/80 border-b border-imm-border pb-2">{typeName}</h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+                                  {typeItems.map((item, index) => renderMovieCard(item, index))}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {filteredItems.length === 0 ? (
+                          <div className="col-span-full py-20 text-center border border-dashed border-imm-border rounded-3xl opacity-40">
+                            <Coffee className="w-8 h-8 mx-auto mb-4" />
+                            <p className="font-serif italic text-lg">No results found...</p>
+                          </div>
+                        ) : (
+                          filteredItems.map((item, index) => renderMovieCard(item, index))
+                        )}
+                      </div>
+                    )}
+                  </section>
+                )}
               </motion.div>
             )}
 
@@ -646,7 +650,46 @@ export default function App() {
               </motion.div>
             )}
 
-            {activeCategory !== 'Home' && activeCategory !== 'Movies' && activeCategory !== 'Anime' && activeCategory !== 'TV Shows' && activeCategory !== 'Games' && activeCategory !== 'Proxies' && (
+            {activeCategory === 'Music' && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 w-full h-full rounded-3xl overflow-hidden border border-imm-border bg-imm-sidebar min-h-[600px]">
+                <iframe src="https://monochrome.tf" title="monochrome.tf" className="w-full h-full border-0" allowFullScreen></iframe>
+              </motion.div>
+            )}
+
+            {activeCategory === 'Books' && activeView === 'discovery' && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-10">
+                <section className="pb-10">
+                  <div className="flex flex-col gap-10">
+                    <div>
+                      <h3 className="serif text-xl font-medium mb-4 text-white/80 border-b border-imm-border pb-2">Books</h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {filteredItems.filter(item => item.type === 'book').length > 0 ? (
+                          filteredItems.filter(item => item.type === 'book').map((item, index) => renderMovieCard(item, index))
+                        ) : (
+                          <div className="col-span-full py-10 text-center opacity-40 border border-dashed border-imm-border rounded-3xl">
+                            <p className="font-serif italic text-lg py-10">No books found...</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="serif text-xl font-medium mb-4 text-white/80 border-b border-imm-border pb-2">Manga</h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {filteredItems.filter(item => item.type === 'manga').length > 0 ? (
+                          filteredItems.filter(item => item.type === 'manga').map((item, index) => renderMovieCard(item, index))
+                        ) : (
+                          <div className="col-span-full py-10 text-center opacity-40 border border-dashed border-imm-border rounded-3xl">
+                            <p className="font-serif italic text-lg py-10">No manga found...</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              </motion.div>
+            )}
+
+            {activeCategory !== 'Home' && activeCategory !== 'Movies' && activeCategory !== 'Anime' && activeCategory !== 'TV Shows' && activeCategory !== 'Games' && activeCategory !== 'Proxies' && activeCategory !== 'Music' && activeCategory !== 'Books' && (
               <motion.div 
                 initial={{ opacity: 0, y: 20 }} 
                 animate={{ opacity: 1, y: 0 }}
@@ -692,16 +735,6 @@ export default function App() {
                   )}
                 </div>
                 <p className="text-base lg:text-lg text-imm-text/80 leading-relaxed font-light italic mb-10">"{selectedMovie.description}"</p>
-                <div className="grid grid-cols-2 gap-4 mb-8">
-                  <div className="p-4 bg-imm-bg rounded-2xl border border-imm-border text-center">
-                    <div className="text-[10px] text-imm-text/40 uppercase tracking-widest mb-1">Director</div>
-                    <div className="text-imm-text font-medium">Studio Ghibli</div>
-                  </div>
-                  <div className="p-4 bg-imm-bg rounded-2xl border border-imm-border text-center">
-                    <div className="text-[10px] text-imm-text/40 uppercase tracking-widest mb-1">Atmosphere Score</div>
-                    <div className="text-imm-accent font-bold">98%</div>
-                  </div>
-                </div>
                 <div className="flex flex-col gap-3">
                   {selectedMovie.links ? (
                     <div className="flex flex-col gap-3">
@@ -743,10 +776,23 @@ export default function App() {
                     </div>
                   ) : (
                     <div className="flex space-x-3">
-                      <button onClick={() => handleWatch(selectedMovie)} className="flex-1 bg-imm-accent text-black py-4 rounded-full font-bold hover:bg-imm-accent-hover transition-all flex items-center justify-center space-x-3">
-                        <Play className="w-5 h-5 fill-current" />
-                        <span>Open in Google Drive</span>
-                      </button>
+                      {selectedMovie.driveLink ? (
+                        <button 
+                          onClick={() => {
+                            setClickCounts(prev => ({ ...prev, [selectedMovie.id]: (prev[selectedMovie.id] || 0) + 1 }));
+                            window.open(selectedMovie.driveLink, '_blank');
+                          }} 
+                          className="flex-1 bg-imm-accent text-black py-4 rounded-full font-bold hover:bg-imm-accent-hover transition-all flex items-center justify-center space-x-3"
+                        >
+                          {selectedMovie.type === 'book' || selectedMovie.type === 'manga' ? <BookOpen className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current" />}
+                          <span>Open in Google Drive</span>
+                        </button>
+                      ) : (
+                        <button onClick={() => handleWatch(selectedMovie)} className="flex-1 bg-imm-accent text-black py-4 rounded-full font-bold hover:bg-imm-accent-hover transition-all flex items-center justify-center space-x-3">
+                          <Play className="w-5 h-5 fill-current" />
+                          <span>Open in Google Drive</span>
+                        </button>
+                      )}
                       <button 
                         onClick={() => toggleLibrary(selectedMovie.id)}
                         title={libraryIds.includes(selectedMovie.id) ? "Remove from Watchlist" : "Add to Watchlist"}
