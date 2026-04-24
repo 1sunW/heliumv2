@@ -43,6 +43,7 @@ export default function App() {
   const [watchedIds, setWatchedIds] = useState<string[]>([]);
   const [clickCounts, setClickCounts] = useState<Record<string, number>>({});
   const [searchQuery, setSearchQuery] = useState('');
+  const [isAnimeGroupsExpanded, setIsAnimeGroupsExpanded] = useState(false);
 
   // Laptop Apps state
   const [laptopSection, setLaptopSection] = useState<'working' | 'pending' | 'info' | 'methods'>('working');
@@ -149,6 +150,16 @@ export default function App() {
   );
 
   const categories: CategoryType[] = ['Home', 'Movies', 'Games', 'Anime', 'TV Shows', 'Proxies', 'Music', 'Books', 'Hacks', 'Extra'];
+
+  const ANIME_REQUIRED_GROUPS = [
+    { name: "Group 1", url: "https://www.google.com/url?q=https%3A%2F%2Ftinyurl.com%2F9yh733xs&sa=D&sntz=1&usg=AOvVaw2_LO0xJ384oc9NVIw5zKBc" },
+    { name: "Group 2", url: "https://groups.google.com/g/itskayoanime/c/1-5fT7wPz58" },
+    { name: "Group 3", url: "https://groups.google.com/g/kayoanime-detective/c/O9AE3S1zY34" },
+    { name: "Group 4", url: "https://groups.google.com/g/kayoanimemyheroacademia/c/vYYRJh528Yo" },
+    { name: "Group 5", url: "https://groups.google.com/g/kayoanimemembers/c/NJchOgztO1w" },
+    { name: "Group 6", url: "https://groups.google.com/g/itskayoanime/c/1-5fT7wPz58" },
+    { name: "Group 7", url: "https://groups.google.com/g/kayoanimemembers/c/NJchOgztO1w" },
+  ];
 
   const renderMovieCard = (item: ContentItem | any, index: number) => (
     <motion.div
@@ -382,6 +393,61 @@ export default function App() {
 
             {(activeCategory === 'Movies' || activeCategory === 'Anime' || activeCategory === 'TV Shows' || (activeCategory === 'Books' && activeView !== 'discovery')) && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-10">
+                {/* Anime Required Groups */}
+                {activeCategory === 'Anime' && activeView === 'discovery' && (
+                  <section>
+                    <button 
+                      onClick={() => setIsAnimeGroupsExpanded(!isAnimeGroupsExpanded)}
+                      className="w-full flex items-center justify-between p-6 bg-imm-card border border-imm-border rounded-2xl hover:border-imm-accent transition-all group"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="p-3 bg-imm-accent/10 rounded-xl group-hover:bg-imm-accent group-hover:text-black transition-colors">
+                          <CheckCircle2 className="w-6 h-6" />
+                        </div>
+                        <div className="text-left">
+                          <h3 className="serif text-xl italic font-bold text-white group-hover:text-imm-accent transition-colors">REQUIRED FOR ANIME</h3>
+                          <p className="text-[10px] uppercase tracking-widest text-imm-text/40">Join these groups to bypass access restrictions</p>
+                        </div>
+                      </div>
+                      <motion.div
+                        animate={{ rotate: isAnimeGroupsExpanded ? 180 : 0 }}
+                        className="text-imm-text/40"
+                      >
+                        <ChevronRight className="w-5 h-5 transform -rotate-90" />
+                      </motion.div>
+                    </button>
+
+                    <AnimatePresence>
+                      {isAnimeGroupsExpanded && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="overflow-hidden"
+                        >
+                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pt-6">
+                            {ANIME_REQUIRED_GROUPS.map((group, idx) => (
+                              <motion.a
+                                key={idx}
+                                href={group.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: idx * 0.05 }}
+                                className="flex items-center justify-between p-4 bg-imm-sidebar border border-imm-border rounded-xl hover:border-imm-accent hover:bg-imm-card transition-all group/btn"
+                              >
+                                <span className="text-xs font-bold uppercase tracking-wider text-imm-text/60 group-hover/btn:text-imm-accent">{group.name}</span>
+                                <ExternalLink className="w-4 h-4 text-imm-text/20 group-hover/btn:text-imm-accent" />
+                              </motion.a>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </section>
+                )}
+
                 {/* Featured Spotlight (Only if Discovery) */}
                 {activeView === 'discovery' && activeCategory === 'Movies' && (
                   <section className="relative h-72 shrink-0 rounded-3xl overflow-hidden border border-white/5 glow-amber">
