@@ -8464,15 +8464,15 @@ export const ANIME_DATA: ContentItem[] = [
 ];
 
 export const PROXY_GROUPS: ProxyGroup[] = [
-  { id: 'utopia', name: 'Utopia', description: 'The Ultimate Solution for Seamless Web Access', links: [] },
-  { id: 'interstellar', name: 'Interstellar', description: 'One of the most popular modern web proxies with blazing fast speeds and a variety of games.', links: [] },
-  { id: 'shadow', name: 'Shadow', description: 'Hidden in dark.', links: [] },
-  { id: 'dogev5', name: 'Dogev5', description: 'The next evolution.', links: [] },
-  { id: 'daydream-x', name: 'DayDream X', description: 'Lucid dreaming.', links: [] },
-  { id: 'space', name: 'Space', description: 'The final frontier.', links: [] },
-  { id: 'rammerhead', name: 'Rammerhead', description: 'Blazing fast.', links: [] },
-  { id: 'axiom', name: 'Axiom', description: 'Self-evident truth.', links: [] },
-  { id: 'fern', name: 'Fern', description: 'Ancient growth.', links: [] },
+  { id: 'utopia', name: 'Utopia', description: 'The Ultimate Solution for Seamless Web Access.', links: [{ id: 'utopia', name: 'Open', url: 'https://docs.google.com/document/d/1ws9M2cNFm1c3U-FFRNs2Y8EM8RNlMj6364lv7Bl7Dqc/edit?usp=drive_link' }] },
+  { id: 'interstellar', name: 'Interstellar', description: 'One of the most popular modern web proxies with blazing fast speeds and a variety of games.', links: [{ id: 'interstellar', name: 'Open', url: 'https://docs.google.com/document/d/1eUYG993J6JnNsDd7Ioz8jTUQMM_yVYLSJc_GNx8OXvo/edit?usp=drive_link' }] },
+  { id: 'shadow', name: 'Shadow', description: 'Search the web under the blanket.', links: [{ id: 'shadow', name: 'Open', url: 'https://docs.google.com/document/d/1RGTzN2eE6qjd3pLkLcqmnos7kj6_DW45KsX97l-rK94/edit?usp=drive_link' }] },
+  { id: 'dogev5', name: 'Dogev5', description: 'all-in-1 BiB, internet / productivity / entertainment hub.', links: [{ id: 'dogev5', name: 'Open', url: 'https://docs.google.com/document/d/1oeLnerwkdOnVmIs5zwk6AZMKypHDpsL8aZqt-SV6nI0/edit?usp=drive_link' }] },
+  { id: 'daydream-x', name: 'DayDream X', description: 'N/A', links: [{ id: 'daydream-x', name: 'Open', url: 'https://docs.google.com/document/d/1bs5CN_S7JsE-KG0r_YorQFJA_MDVwwrgDuePXcscI2E/edit?usp=drive_link' }] },
+  { id: 'space', name: 'Space', description: 'N/A', links: [{ id: 'space', name: 'Open', url: 'https://docs.google.com/document/d/1eNDIlPfzyXvopaKsr-wHYuQM7DpjK6yH02uf0XXde6s/edit?usp=drive_link' }] },
+  { id: 'rammerhead', name: 'Rammerhead', description: 'Blazing fast.', links: [{ id: 'rammerhead', name: 'Open', url: 'https://docs.google.com/document/d/1vJ3EKiZkjLhANQkI3idwuKjYG9fU47WYSWRW1Ij-G9k/edit?usp=drive_link' }] },
+  { id: 'axiom', name: 'Axiom', description: 'A fast, private proxy with weekly link drops.', links: [{ id: 'axiom', name: 'Open', url: 'https://docs.google.com/document/d/1PK0Fmjvr2DGMc03Lv_tpDOxPP2j87GnY917WqKX00Ws/edit?usp=sharing' }] },
+  { id: 'fern', name: 'Fern', description: 'avoid censorship using the best game / proxy site available.', links: [{ id: 'fern', name: 'Open', url: 'https://docs.google.com/document/d/123fWbpbv6UjG6GSfDGgnofkSGu-4DqcPIjOzWhjXO6A/edit?usp=drive_link' }] },
 ];
 
 export const PARTNERS: Partner[] = [
