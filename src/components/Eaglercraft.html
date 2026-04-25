@@ -1,0 +1,180 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ampler Launcher</title>
+    
+    <base href="https://fastly.jsdelivr.net/gh/irv77/AmplerLauncher/">
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" media="screen and (max-width: 1100px)" href="css/screensize.css">
+    <link rel="stylesheet" media="screen and (max-height: 550px)" href="css/screensize.css">
+    <link rel="shortcut icon" href="assets/images/logo.png" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&amp;display=swap" rel="stylesheet">
+    
+    <meta content="Ampler Launcher" property="og:title">
+    <meta content="A minecraft themed launcher for Eaglercraft!" property="og:description">
+    <meta content="https://irv77.github.io/AmplerLauncher/" property="og:url">
+    <meta content="assets/images/logo.png" property="og:image">
+    <meta content="#786d81" data-react-helmet="true" name="theme-color">
+
+    <script>
+        function launchGame(path) {
+            const fullUrl = "https://fastly.jsdelivr.net/gh/irv77/AmplerLauncher/" + path + "index.html";
+            
+            fetch(fullUrl)
+                .then(response => response.text())
+                .then(html => {
+                    document.open();
+                    document.write('<base href="https://fastly.jsdelivr.net/gh/irv77/AmplerLauncher/' + path + '">');
+                    document.write(html);
+                    document.close();
+                })
+                .catch(err => {
+                    console.error("Failed to load game:", err);
+                    window.location.href = fullUrl; 
+                });
+        }
+
+        (function() {
+            function interceptLinks() {
+                const playBtn = document.getElementById('playbutton');
+                if (playBtn) {
+                    playBtn.onclick = function(e) {
+                        e.preventDefault();
+                        const currentPath = playBtn.getAttribute('href'); 
+                        launchGame(currentPath);
+                    };
+                }
+            }
+            document.addEventListener('DOMContentLoaded', interceptLinks);
+        })();
+    </script><link type="text/css" rel="stylesheet" id="dark-mode-general-link"><link type="text/css" rel="stylesheet" id="dark-mode-custom-link"><style lang="en" type="text/css" id="dark-mode-custom-style"></style><style lang="en" type="text/css" id="dark-mode-native-style"></style><style lang="en" type="text/css" id="dark-mode-native-sheet"></style>
+</head>
+
+<body>
+    <div id="notescreen"></div>
+    <div id="naerror" class="error">
+        <div>
+            <p style="margin-left: 1vw;" class="bolded">SORRY!</p>
+            <p style="color: goldenrod;" id="errortext">This feature hasn't been made yet.</p>
+        </div>
+    </div>
+    <div id="screenerror" class="error">
+        <div>
+            <p style="margin-left: 1vw;" class="bolded">ERROR!</p>
+            <p>Currently this screen resolution is buggy.</p>
+        </div>
+    </div>
+    <div class="sidebar" id="sidebar">
+        <div id="gtabs1" class="sidebarOptions" style="gap: 1vw;" onclick="location.href='https://discord.gg/xuu8TnSY4b'">
+            <img src="assets/images/sidebar/m-discord.png"><div class="gTabsText"><p>Discord</p></div>
+        </div>
+        <div onclick="webedition()" id="gtabs2" class="sidebarOptions selected">
+            <img src="assets/images/sidebar/i-web.png">
+            <div class="gTabsText">
+                <p class="eaglercraftText"> EAGLERCRAFT : </p>
+                <p>Web Edition </p>
+            </div>
+        </div>
+        <div onclick="moddededition()" id="gtabs3" class="sidebarOptions">
+            <img src="assets/images/sidebar/i-modded.png">
+            <div class="gTabsText">
+                <p class="eaglercraftText"> EAGLERCRAFT : </p>
+                <p>Modded Editions </p>
+            </div>
+        </div>
+        <div onclick="eaglercontrols()" id="gtabs4" class="sidebarOptions">
+            <img src="assets/images/sidebar/i-controls.png">
+            <div class="gTabsText">
+                <p class="eaglercraftText"> EAGLERCRAFT : </p>
+                <p>Mobile/Controller </p>
+            </div>
+        </div>
+        <div id="gtabs5" class="sidebarOptions sidebarBottom" onclick="errorNA('credits')">
+            <img src="assets/images/sidebar/m-credits.png"><div class="gTabsText"><p> Credits</p></div>
+        </div>
+        <div id="gtabs6" class="sidebarOptions sidebarBottom" onclick="errorNA('settings')">
+            <img src="assets/images/sidebar/m-settings.png"><div class="gTabsText"><p> Settings</p></div>
+        </div>
+        <div class="launcherVersion"><p>v1.4.00</p></div>
+    </div>
+    <div class="mainPage">
+        <div class="gameHeader">
+            <p id="gameedition" class="currentGame bolded">EAGLERCRAFT WEB EDITION</p>
+                <ul class="gameTabs">
+                    <li id="header1" class="headerButtons selected" onclick="playheader()" style="display: block;">Play</li>
+                    <li id="header2" style="display: none;" class="headerButtons" onclick="modsheader()">Mods</li>
+                    <li id="header3" class="headerButtons" onclick="faqsheader()" style="display: block;">FAQ</li>
+                    <li id="header4" class="headerButtons" onclick="installationheader()" style="display: block;">Installations</li>
+                    <li id="header5" class="headerButtons" onclick="errorNA('skins')" style="display: block;">Skins</li>
+                    <li id="header6" class="headerButtons" onclick="patchnotesheader()" style="display: block;">Patch Notes</li>
+                </ul>
+        </div>
+        <div id="mods" style="display: none;">
+            <img class="modketplace-title" src="assets/images/modketplace-title.png" alt="modketplace">
+            <p class="bolded modssubtitle">Community mods for the EaglerForge Installation.</p>
+            <div id="modsbox"></div>
+        </div>
+        <div id="faq" style="display: none;">
+            <p class="bolded faqtitle">Frequently Asked Questions</p>
+            <p>Here are some frequently asked questions about Ampler Launcher.</p>
+            <div id="faqbox"><div class="faqoption"><div class="bolded faqtext"><p class="faqsymbol">Q</p><p>Will there be a offline download?</p></div><div class="faqtext"><p class="bolded faqsymbol">A</p><p>Possibly once developement is done.</p></div></div><div class="faqoption"><div class="bolded faqtext"><p class="faqsymbol">Q</p><p>How often are the launcher options updated?</p></div><div class="faqtext"><p class="bolded faqsymbol">A</p><p>Whenever the next big update is.</p></div></div><div class="faqoption"><div class="bolded faqtext"><p class="faqsymbol">Q</p><p>How can I contribute?</p></div><div class="faqtext"><p class="bolded faqsymbol">A</p><p>You can join my discord server to give suggestions or to help add code.</p></div></div><div class="faqoption"><div class="bolded faqtext"><p class="faqsymbol">Q</p><p>Can I use your code?</p></div><div class="faqtext"><p class="bolded faqsymbol">A</p><p>Yes, but PLEASE credit if you do copy my code.</p></div></div><div class="faqoption"><div class="bolded faqtext"><p class="faqsymbol">Q</p><p>How do I add my own mod to the modketplace?</p></div><div class="faqtext"><p class="bolded faqsymbol">A</p><p>You can suggest your mod in my discord server and it might be added.</p></div></div></div>
+        </div>
+        <div id="installations" style="display: none;"><div id="installationsbox"><hr><div class="installationOptions"><div class="installationOption"><input class="installationBox" type="checkbox"><img src="./assets/images/mc-icons/grass.png"><div class="installationOptionText"><p class="bolded">Latest release</p><p>1.12.2-u2</p></div></div></div><hr><div class="installationOptions"><div class="installationOption"><input class="installationBox" type="checkbox"><img src="./assets/images/mc-icons/grass-wasm.png"><div class="installationOptionText"><p class="bolded">Latest release WASM</p><p>1.12.2-u2-wasm</p></div></div></div><hr><div class="installationOptions"><div class="installationOption"><input class="installationBox" type="checkbox"><img src="./assets/images/mc-icons/dirt.png"><div class="installationOptionText"><p class="bolded">Previous release</p><p>1.8.8-u53</p></div></div></div><hr><div class="installationOptions"><div class="installationOption"><input class="installationBox" type="checkbox"><img src="./assets/images/mc-icons/dirt-wasm.png"><div class="installationOptionText"><p class="bolded">Previous release WASM</p><p>1.8.8-u53-wasm</p></div></div></div><hr><div class="installationOptions"><div class="installationOption"><input class="installationBox" type="checkbox"><img src="./assets/images/mc-icons/hay-bale.png"><div class="installationOptionText"><p class="bolded">Eaglercraft 1.6.4</p><p>1.6.4-25w17a</p></div></div></div><hr><div class="installationOptions"><div class="installationOption"><input class="installationBox" type="checkbox"><img src="./assets/images/mc-icons/hopper.png"><div class="installationOptionText"><p class="bolded">Older release</p><p>1.5.2-sp2.01</p></div></div></div><hr><div class="installationOptions"><div class="installationOption"><input class="installationBox" type="checkbox"><img src="./assets/images/mc-icons/jungle-log.png"><div class="installationOptionText"><p class="bolded">Eaglercraft 1.2.5</p><p>1.2.5</p></div></div></div><hr><div class="installationOptions"><div class="installationOption"><input class="installationBox" type="checkbox"><img src="./assets/images/mc-icons/sticky-piston.png"><div class="installationOptionText"><p class="bolded">Eaglercraft Beta 1.7.3</p><p>b1.7.3</p></div></div></div><hr><div class="installationOptions"><div class="installationOption"><input class="installationBox" type="checkbox"><img src="./assets/images/mc-icons/trapped-chest.png"><div class="installationOptionText"><p class="bolded">Eaglercraft Beta 1.4</p><p>b1.4_01-25w21b</p></div></div></div><hr><div class="installationOptions"><div class="installationOption"><input class="installationBox" type="checkbox"><img src="./assets/images/mc-icons/red-bed.png"><div class="installationOptionText"><p class="bolded">Eaglercraft Beta 1.3</p><p>b1.3_01-23w49a</p></div></div></div><hr><div class="installationOptions"><div class="installationOption"><input class="installationBox" type="checkbox"><img src="./assets/images/mc-icons/oak-leaves.png"><div class="installationOptionText"><p class="bolded">Eaglercraft Beta 1.1</p><p>b1.1_02-25w20a</p></div></div></div><hr><div class="installationOptions"><div class="installationOption"><input class="installationBox" type="checkbox"><img src="./assets/images/mc-icons/jack-o-lantern.png"><div class="installationOptionText"><p class="bolded">Eaglercraft Alpha 1.2.6</p><p>a1.2.6</p></div></div></div><hr><div class="installationOptions"><div class="installationOption"><input class="installationBox" type="checkbox"><img src="./assets/images/mc-icons/clay.png"><div class="installationOptionText"><p class="bolded">Eaglercraft Alpha 1.1.2</p><p>a1.1.2_01-25w20b</p></div></div></div><hr><div class="installationOptions"><div class="installationOption"><input class="installationBox" type="checkbox"><img src="./assets/images/mc-icons/monster-spawner.png"><div class="installationOptionText"><p class="bolded">Eaglercraft Infdev</p><p>inf</p></div></div></div><hr><div class="installationOptions"><div class="installationOption"><input class="installationBox" type="checkbox"><img src="./assets/images/mc-icons/monster-spawner-wasm.png"><div class="installationOptionText"><p class="bolded">Eaglercraft Infdev WASM</p><p>inf-wasm</p></div></div></div><hr><div class="installationOptions"><div class="installationOption"><input class="installationBox" type="checkbox"><img src="./assets/images/mc-icons/furnace.png"><div class="installationOptionText"><p class="bolded">Eaglercraft Indev</p><p>inv</p></div></div></div><hr><div class="installationOptions"><div class="installationOption"><input class="installationBox" type="checkbox"><img src="./assets/images/mc-icons/tnt.png"><div class="installationOptionText"><p class="bolded">Eaglercraft Classic 0.30</p><p>c0.30</p></div></div></div><hr><div class="installationOptions"><div class="installationOption"><input class="installationBox" type="checkbox"><img src="./assets/images/mc-icons/tnt-wasm.png"><div class="installationOptionText"><p class="bolded">Eaglercraft Classic 0.30 WASM</p><p>c0.30-wasm</p></div></div></div><hr></div></div>
+        <div id="game-bg" style="background-image: url(&quot;assets/images/web-edition.jpg&quot;); display: flex;">
+            <img id="game-title" src="./assets/images/web-title.png" alt="eaglercraft">
+        </div>
+        <div id="patchNotes" style="display: none;">
+            <div style="padding: 2vh 3vw 7vh;">
+                <p class="bolded patchnotes-title">Versions</p>
+                <div class="versionscontainer">
+                    <input class="versionBox" type="checkbox" onchange="sortnote('game')" checked=""><p>Game Releases</p><input class="versionBox" type="checkbox" onchange="sortnote('site')" checked=""><p>Site Releases</p>
+                </div>
+                <hr>
+                <div id="patchnotesbox"></div>
+            </div>
+        </div>
+        <div id="gameSelection" style="display: flex;">
+                <div class="dropdownSelector" onclick="dropdowntoggle()">
+                    <div style="display: flex; gap: 1vw;">
+                        <div class="centeredIcon">
+                            <img id="gameicon" src="assets/images/mc-icons/grass.png" style="width: 2.5vw;">
+                        </div>
+                        <div class="versionText">
+                            <p id="gametitle" class="bolded">Latest release</p>
+                            <p id="gameversion">1.12.2-u2</p>
+                        </div>
+                        <div id="dropdownuparrow" class="centeredIcon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="dropdownIcon">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                <path d="M6 9l6 6l6 -6"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            <div id="dropdn" class="dropdownMenu" style="visibility: hidden;"><div class="dropdownOptions" style="bottom: 0vw;"><div class="dropdownOption"><img src="./assets/images/mc-icons/hopper.png"><div class="dropdownOptionText"><p class="bolded">Older release</p><p>1.5.2-sp2.01</p></div></div></div><div class="dropdownOptions" style="bottom: 5vw;"><div class="dropdownOption"><img src="./assets/images/mc-icons/dirt-wasm.png"><div class="dropdownOptionText"><p class="bolded">Previous release WASM</p><p>1.8.8-u53-wasm</p></div></div></div><div class="dropdownOptions" style="bottom: 10vw;"><div class="dropdownOption"><img src="./assets/images/mc-icons/dirt.png"><div class="dropdownOptionText"><p class="bolded">Previous release</p><p>1.8.8-u53</p></div></div></div><div class="dropdownOptions" style="bottom: 15vw;"><div class="dropdownOption"><img src="./assets/images/mc-icons/grass-wasm.png"><div class="dropdownOptionText"><p class="bolded">Latest release WASM</p><p>1.12.2-u2-wasm</p></div></div></div><div class="dropdownOptions" style="bottom: 20vw;"><div class="dropdownOption"><img src="./assets/images/mc-icons/grass.png"><div class="dropdownOptionText"><p class="bolded">Latest release</p><p>1.12.2-u2</p></div></div></div></div>
+            <a id="playbutton" href="mc/1.12.2/"><div id="mainbutton" class="playButton"></div></a>
+            <div class="username centeredIcon bolded"><p id="username">Darth Kid Tiger</p></div>
+        </div>
+    </div>
+    <script>
+// Not Added Feature
+function errorNA(text) {
+    clearTimeout()
+    const errText = document.getElementById('errortext');
+    const naError = document.getElementById('naerror');
+    if(errText) errText.innerHTML = "The " + text + " feature hasn't been made yet."
+    if(naError) {
+        naError.style.display = 'block';
+        setTimeout(function(){
+            naError.classList.add('zoom-out');
+        }, 3000);
+        setTimeout(function(){
+            naError.classList.remove('zoom-out');
+            naError.style.display = 'none';
+            if(errText) errText.innerHTML = "This feature hasn't been made yet."
+        }, 3200);
+    }
+}
+</script>
+</body></html>

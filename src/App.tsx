@@ -28,9 +28,14 @@ import {
   CheckCircle2,
   MessageSquare,
   Wind,
-  Activity
+  Activity,
+  Maximize2,
+  Minimize2
 } from 'lucide-react';
 import GamesEmbed from './components/GamesEmbed';
+import airChatHtml from './components/AirChat.html?raw';
+import hydrogenChatHtml from './components/HydrogenChat.html?raw';
+import eaglercraftHtml from './components/Eaglercraft.html?raw';
 
 type CategoryType = 'Home' | 'Movies' | 'Games' | 'Anime' | 'Proxies' | 'Music' | 'TV Shows' | 'Books' | 'Hacks' | 'Extra';
 
@@ -44,6 +49,12 @@ export default function App() {
   const [clickCounts, setClickCounts] = useState<Record<string, number>>({});
   const [searchQuery, setSearchQuery] = useState('');
   const [isAnimeGroupsExpanded, setIsAnimeGroupsExpanded] = useState(false);
+  const [isAirChatOpen, setIsAirChatOpen] = useState(false);
+  const [isAirChatFullscreen, setIsAirChatFullscreen] = useState(false);
+  const [isHydrogenChatOpen, setIsHydrogenChatOpen] = useState(false);
+  const [isHydrogenChatFullscreen, setIsHydrogenChatFullscreen] = useState(false);
+  const [isEaglercraftOpen, setIsEaglercraftOpen] = useState(false);
+  const [isEaglercraftFullscreen, setIsEaglercraftFullscreen] = useState(false);
 
   // Laptop Apps state
   const [laptopSection, setLaptopSection] = useState<'working' | 'pending' | 'info' | 'methods'>('working');
@@ -282,8 +293,6 @@ export default function App() {
               <div className="h-px bg-imm-border w-full"></div>
               
               <ul className="space-y-4">
-                <li className="hover:text-imm-text cursor-pointer transition-colors">Recent</li>
-                <li className="hover:text-imm-text cursor-pointer transition-colors">Trending</li>
               </ul>
             </nav>
 
@@ -297,6 +306,96 @@ export default function App() {
         <main className="flex-1 flex flex-col relative overflow-y-auto bg-imm-bg">
           {/* Amber Glow background effect */}
           <div className="absolute top-0 right-0 w-96 h-96 bg-imm-accent/10 rounded-full blur-[150px] pointer-events-none"></div>
+
+          {/* Air Chat Modal */}
+          {isAirChatOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className={`fixed inset-0 z-[1000] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 ${isAirChatFullscreen ? "!p-0" : ""}`}
+              onClick={() => { setIsAirChatOpen(false); setIsAirChatFullscreen(false); }}
+            >
+              <motion.div
+                initial={{ scale: 0.95 }}
+                animate={{ scale: 1 }}
+                onClick={e => e.stopPropagation()}
+                className={`bg-imm-bg border border-imm-border rounded-3xl overflow-hidden shadow-2xl relative ${isAirChatFullscreen ? "!rounded-none !w-screen !h-screen" : "w-[90vw] max-w-4xl h-[80vh] max-h-[700px]"}`}
+              >
+                <button 
+                  className="absolute top-4 right-4 z-50 bg-imm-sidebar text-imm-text p-2 rounded-full border border-imm-border hover:bg-imm-accent hover:text-black transition-all"
+                  onClick={() => setIsAirChatFullscreen(!isAirChatFullscreen)}
+                >
+                  {isAirChatFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+                </button>
+                  <iframe 
+                    srcDoc={airChatHtml}
+                    className="w-full h-full border-none"
+                    title="Air Chat"
+                  />
+              </motion.div>
+            </motion.div>
+          )}
+
+          {/* Hydrogen Chat Modal */}
+          {isHydrogenChatOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className={`fixed inset-0 z-[1000] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 ${isHydrogenChatFullscreen ? "!p-0" : ""}`}
+              onClick={() => { setIsHydrogenChatOpen(false); setIsHydrogenChatFullscreen(false); }}
+            >
+              <motion.div
+                initial={{ scale: 0.95 }}
+                animate={{ scale: 1 }}
+                onClick={e => e.stopPropagation()}
+                className={`bg-imm-bg border border-imm-border rounded-3xl overflow-hidden shadow-2xl relative ${isHydrogenChatFullscreen ? "!rounded-none !w-screen !h-screen" : "w-[90vw] max-w-4xl h-[80vh] max-h-[700px]"}`}
+              >
+                <button 
+                  className="absolute top-4 right-4 z-50 bg-imm-sidebar text-imm-text p-2 rounded-full border border-imm-border hover:bg-imm-accent hover:text-black transition-all"
+                  onClick={() => setIsHydrogenChatFullscreen(!isHydrogenChatFullscreen)}
+                >
+                  {isHydrogenChatFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+                </button>
+                  <iframe 
+                    srcDoc={hydrogenChatHtml}
+                    className="w-full h-full border-none"
+                    title="Hydrogen Chat"
+                  />
+              </motion.div>
+            </motion.div>
+          )}
+
+          {/* Eaglercraft Modal */}
+          {isEaglercraftOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className={`fixed inset-0 z-[1000] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 ${isEaglercraftFullscreen ? "!p-0" : ""}`}
+              onClick={() => { setIsEaglercraftOpen(false); setIsEaglercraftFullscreen(false); }}
+            >
+              <motion.div
+                initial={{ scale: 0.95 }}
+                animate={{ scale: 1 }}
+                onClick={e => e.stopPropagation()}
+                className={`bg-imm-bg border border-imm-border rounded-3xl overflow-hidden shadow-2xl relative ${isEaglercraftFullscreen ? "!rounded-none !w-screen !h-screen" : "w-[90vw] max-w-4xl h-[80vh] max-h-[700px]"}`}
+              >
+                <button 
+                  className="absolute top-4 right-4 z-50 bg-imm-sidebar text-imm-text p-2 rounded-full border border-imm-border hover:bg-imm-accent hover:text-black transition-all"
+                  onClick={() => setIsEaglercraftFullscreen(!isEaglercraftFullscreen)}
+                >
+                  {isEaglercraftFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+                </button>
+                  <iframe 
+                    srcDoc={eaglercraftHtml}
+                    className="w-full h-full border-none"
+                    title="Eaglercraft"
+                  />
+              </motion.div>
+            </motion.div>
+          )}
 
           {/* Header */}
           <header className={`h-20 shrink-0 px-6 lg:px-10 flex items-center justify-between border-b border-imm-border z-[100] sticky top-0 bg-imm-bg/95 backdrop-blur-md shadow-sm transition-opacity duration-300 ${selectedMovie || activeMethod || activeExtra ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
@@ -354,7 +453,7 @@ export default function App() {
                   <div className="relative z-10 max-w-2xl">
                     <h1 className="serif text-6xl mb-6 text-white italic tracking-tight">Helium Awaits.</h1>
                     <p className="text-imm-text/70 text-lg font-light leading-relaxed mb-8">
-                      Welcome to your personal hub. Explore cinema, discover hacks, browse anime, or just stay immersive. Everything you need, unified in one serene interface.
+                      Welcome to Helium, everything for everyone.
                     </p>
                     <button 
                       onClick={() => handleCategorySelect('Movies')}
@@ -370,13 +469,13 @@ export default function App() {
 
                 {/* Sub-Category Cards */}
                 {[
-                  { name: 'Movies', icon: Play, count: MOVIES.length, desc: 'Cinematic journeys.' },
-                  { name: 'Games', icon: Gamepad2, count: 0, desc: 'Interactive worlds.' },
-                  { name: 'Extra', icon: Ghost, count: 0, desc: 'Experimental portals.' },
-                  { name: 'Anime', icon: Sparkles, count: ANIME_DATA.length, desc: 'Hand-drawn dreams.' },
-                  { name: 'Proxies', icon: Layers, count: 0, desc: 'Secure pathways.' },
-                  { name: 'Music', icon: MusicIcon, count: 0, desc: 'Rhythmic escapes.' },
-                  { name: 'TV Shows', icon: Tv, count: TV_SHOWS.length, desc: 'Episodic comfort.' }
+                  { name: 'Movies', icon: Play, count: MOVIES.length, desc: 'Watch amazing films.' },
+                  { name: 'Games', icon: Gamepad2, count: 0, desc: 'Explore different perspectives.' },
+                  { name: 'Anime', icon: Sparkles, count: ANIME_DATA.length, desc: 'Watch your favorite animated films.' },
+                  { name: 'Proxies', icon: Layers, count: 0, desc: 'Surf the web securly.' },
+                  { name: 'Music', icon: MusicIcon, count: 0, desc: 'Listen to your favorite jams.' },
+                  { name: 'TV Shows', icon: Tv, count: TV_SHOWS.length, desc: 'View episodic adventures.' },
+                  { name: 'Extra', icon: Ghost, count: 0, desc: 'Portals to different worlds.' }
                 ].map((item) => (
                   <div 
                     key={item.name}
@@ -862,9 +961,9 @@ export default function App() {
                         { title: 'Info', icon: Info, action: () => setActiveExtra({ title: 'System Status', content: 'We are hearing about a rumor that you can\'t access the movies. "The number of allowed playback" or something like that. New method: Exit the tab, wait for 2 minutes, and come back on to the movie.' }) },
                         { title: 'Leaks', icon: Zap, action: () => setActiveExtra({ title: 'Deep Leaks', content: 'New theme?' }) },
                         { title: 'Credits', icon: Sparkles, action: () => setActiveExtra({ title: 'Helium Credits', content: 'Thank you P-Stream, Chill Zone, M3T4L, Ultimate Game Stash (UGS), and Chill Kirb Central.' }) },
-                        { title: 'Air', icon: Wind },
-                        { title: 'Hydrogen', icon: Activity },
-                        { title: 'Eaglercraft', icon: Gamepad2 }
+                        { title: 'Air', icon: Wind, action: () => setIsAirChatOpen(true) },
+                        { title: 'Hydrogen', icon: Activity, action: () => setIsHydrogenChatOpen(true) },
+                        { title: 'Eaglercraft', icon: Gamepad2, action: () => setIsEaglercraftOpen(true) }
                       ].map((btn) => (
                         <button
                           key={btn.title}
@@ -1172,7 +1271,7 @@ export default function App() {
                       >
                         <Heart className={`w-5 h-5 ${libraryIds.includes(selectedMovie.id) ? 'fill-current' : ''}`} />
                       </button>
-                      <button 
+                      <button
                         onClick={() => toggleWatched(selectedMovie.id)}
                         title={watchedIds.includes(selectedMovie.id) ? "Remove from Library" : "Add to Completed Library"}
                         className={`px-6 rounded-full border border-imm-border hover:bg-black/40 transition-all flex items-center justify-center
