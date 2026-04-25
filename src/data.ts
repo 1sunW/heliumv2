@@ -6777,6 +6777,19 @@ export const ANIME_DATA: ContentItem[] = [
                 ]
             },
             {
+                id: "an104",
+                title: "Bleach",
+                description: "Ichigo Kurosaki gains the powers of a Soul Reaper and protects the world from spirits.",
+                year: "2004",
+                rating: "8.2",
+                duration: "24m",
+                genre: ["Action", "Adventure", "Supernatural"],
+                image: "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcTrYxQx4YbeUw1fhsKpAECEItn6C5SemrIsAdA28M0guYj5_SW_",
+                mood: "Good",
+                type: "anime",
+                driveLink: "https://drive.google.com/drive/folders/1cW5SS4av8cQNVFxG8fhbCvOhfVaGPNDj?usp=sharing"
+            },
+            {
                 id: "an7",
                 title: "Berserk",
                 description: "A lone mercenary named Guts travels a medieval world, fighting demons and searching for his former comrade Griffith.",
