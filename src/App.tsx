@@ -30,7 +30,13 @@ import {
   Wind,
   Activity,
   Maximize2,
-  Minimize2
+  Minimize2,
+  Settings,
+  Battery,
+  Palette,
+  Languages,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import GamesEmbed from './components/GamesEmbed';
 import airChatHtml from './components/AirChat.html?raw';
@@ -56,6 +62,208 @@ export default function App() {
   const [isEaglercraftOpen, setIsEaglercraftOpen] = useState(false);
   const [isEaglercraftFullscreen, setIsEaglercraftFullscreen] = useState(false);
   const [isChangelogOpen, setIsChangelogOpen] = useState(false);
+  const [isTopBarHidden, setIsTopBarHidden] = useState(false);
+  
+  // Settings & Customization state
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isSettingsFullscreen, setIsSettingsFullscreen] = useState(false);
+  const [settingsTab, setSettingsTab] = useState<'theme' | 'cloak' | 'language'>('theme');
+  const [currentTheme, setCurrentTheme] = useState('Original Helium');
+  
+  const [cloakSelection, setCloakSelection] = useState('Google');
+  const [customCloakName, setCustomCloakName] = useState('My Custom Tab');
+  const [customCloakIcon, setCustomCloakIcon] = useState('https://www.google.com/favicon.ico');
+  
+  const [language, setLanguage] = useState(() => {
+    return localStorage.getItem('helium_lang') || 'English';
+  });
+  const [useMilitaryTime, setUseMilitaryTime] = useState(() => {
+    return localStorage.getItem('helium_military_time') === 'true';
+  });
+  const [timeZone, setTimeZone] = useState(() => {
+    return localStorage.getItem('helium_timezone') || 'Local';
+  });
+  
+  useEffect(() => {
+    localStorage.setItem('helium_military_time', useMilitaryTime.toString());
+  }, [useMilitaryTime]);
+
+  useEffect(() => {
+    localStorage.setItem('helium_timezone', timeZone);
+  }, [timeZone]);
+  
+  const [timeStr, setTimeStr] = useState<string>('');
+  const [batteryLevel, setBatteryLevel] = useState<number | null>(null);
+
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      const options: Intl.DateTimeFormatOptions = { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: !useMilitaryTime
+      };
+      if (timeZone !== 'Local') {
+        options.timeZone = timeZone;
+      }
+      try {
+        setTimeStr(now.toLocaleTimeString([], options));
+      } catch (e) {
+        setTimeStr(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: !useMilitaryTime }));
+      }
+    };
+    updateTime();
+    const timer = setInterval(updateTime, 1000);
+    return () => clearInterval(timer);
+  }, [useMilitaryTime, timeZone]);
+
+  useEffect(() => {
+    if ('getBattery' in navigator) {
+      (navigator as any).getBattery().then((batt: any) => {
+        setBatteryLevel(Math.round(batt.level * 100));
+        batt.addEventListener('levelchange', () => {
+          setBatteryLevel(Math.round(batt.level * 100));
+        });
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    // Basic theme injection targeting variables defined in Tailwind theme
+    if (currentTheme === 'Light') {
+      document.documentElement.style.setProperty('--color-imm-bg', '#ffffff');
+      document.documentElement.style.setProperty('--color-imm-text', '#000000');
+      document.documentElement.style.setProperty('--color-imm-card', '#f3f4f6');
+      document.documentElement.style.setProperty('--color-imm-sidebar', '#e5e7eb');
+      document.documentElement.style.setProperty('--color-imm-border', '#d1d5db');
+    } else if (currentTheme === 'Midnight') {
+      document.documentElement.style.setProperty('--color-imm-bg', '#020617');
+      document.documentElement.style.setProperty('--color-imm-text', '#f8fafc');
+      document.documentElement.style.setProperty('--color-imm-card', '#0f172a');
+      document.documentElement.style.setProperty('--color-imm-sidebar', '#020617');
+      document.documentElement.style.setProperty('--color-imm-border', '#1e293b');
+    } else if (currentTheme === 'Hacker') {
+      document.documentElement.style.setProperty('--color-imm-bg', '#000000');
+      document.documentElement.style.setProperty('--color-imm-text', '#00ff00');
+      document.documentElement.style.setProperty('--color-imm-card', '#001100');
+      document.documentElement.style.setProperty('--color-imm-sidebar', '#000500');
+      document.documentElement.style.setProperty('--color-imm-border', '#003300');
+      document.documentElement.style.setProperty('--color-imm-accent', '#00ff00');
+    } else {
+      document.documentElement.style.removeProperty('--color-imm-bg');
+      document.documentElement.style.removeProperty('--color-imm-text');
+      document.documentElement.style.removeProperty('--color-imm-card');
+      document.documentElement.style.removeProperty('--color-imm-sidebar');
+      document.documentElement.style.removeProperty('--color-imm-border');
+      document.documentElement.style.removeProperty('--color-imm-accent');
+    }
+  }, [currentTheme]);
+
+  const CLOAK_PRESETS = [
+    { name: 'Google', icon: 'https://www.google.com/favicon.ico' },
+    { name: 'My Drive - Google Drive', icon: 'https://ssl.gstatic.com/images/branding/product/1x/drive_2020q4_32dp.png' },
+    { name: 'Classes', icon: 'https://ssl.gstatic.com/classroom/favicon.png' },
+    { name: 'Clever | Portal', icon: 'https://assets.clever.com/favicons/clever-favicon.ico' },
+    { name: 'Dashboard', icon: 'https://www.instructure.com/favicon.ico' },
+    { name: 'Home | Schoology', icon: 'https://asset-cdn.schoology.com/sites/all/themes/schoology_theme/favicon.ico' },
+    { name: 'Kahoot!', icon: 'https://kahoot.com/favicon.ico' },
+    { name: 'Quizlet', icon: 'https://assets.quizlet.com/a/j/dist/app/i/logo/2021/favicon.ico' },
+    { name: 'Desmos | Graphing Calculator', icon: 'https://www.desmos.com/favicon.ico' },
+    { name: 'Khan Academy', icon: 'https://cdn.kastatic.org/images/favicon.ico' },
+    { name: 'Custom', icon: '' }
+  ];
+
+  const TIME_ZONES = [
+    { label: 'Local Time', value: 'Local' },
+    { label: 'UTC', value: 'UTC' },
+    { label: 'Eastern Time (ET)', value: 'America/New_York' },
+    { label: 'Central Time (CT)', value: 'America/Chicago' },
+    { label: 'Mountain Time (MT)', value: 'America/Denver' },
+    { label: 'Pacific Time (PT)', value: 'America/Los_Angeles' },
+    { label: 'London (GMT/BST)', value: 'Europe/London' },
+    { label: 'Paris (CET/CEST)', value: 'Europe/Paris' },
+    { label: 'Tokyo (JST)', value: 'Asia/Tokyo' },
+    { label: 'Shanghai (CST)', value: 'Asia/Shanghai' },
+    { label: 'Sydney (AEST/AEDT)', value: 'Australia/Sydney' }
+  ];
+
+  const LANGUAGES = [
+    'English', 'Spanish', 'French', 'Russian', 'Chinese (Simplified)', 
+    'Japanese', 'Vietnamese', 'German', 'Italian', 'Portuguese'
+  ];
+
+  const LANG_CODES: Record<string, string> = {
+    'English': 'en',
+    'Spanish': 'es',
+    'French': 'fr',
+    'Russian': 'ru',
+    'Chinese (Simplified)': 'zh-CN',
+    'Japanese': 'ja',
+    'Vietnamese': 'vi',
+    'German': 'de',
+    'Italian': 'it',
+    'Portuguese': 'pt'
+  };
+
+  const handleLanguageChange = (lang: string) => {
+    setLanguage(lang);
+    localStorage.setItem('helium_lang', lang);
+    const code = LANG_CODES[lang];
+    if (code) {
+      if (code === 'en') {
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=None; Secure";
+      } else {
+        document.cookie = `googtrans=/en/${code}; path=/; SameSite=None; Secure`;
+      }
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
+    }
+  };
+
+  const handleOpenCloak = () => {
+    let title = '';
+    let icon = '';
+    if (cloakSelection === 'Custom') {
+      title = customCloakName;
+      icon = customCloakIcon;
+    } else {
+      const preset = CLOAK_PRESETS.find(p => p.name === cloakSelection);
+      if (preset) {
+        title = preset.name;
+        icon = preset.icon;
+      }
+    }
+
+    const win = window.open('about:blank', '_blank');
+    if (!win) {
+      alert("Popup blocked! Please allow popups for this site.");
+      return;
+    }
+
+    const doc = win.document;
+    doc.title = title;
+    
+    const link = doc.createElement('link');
+    link.rel = 'icon';
+    link.href = icon;
+    doc.head.appendChild(link);
+
+    const iframe = doc.createElement('iframe');
+    iframe.src = window.location.href;
+    iframe.style.width = '100vw';
+    iframe.style.height = '100vh';
+    iframe.style.border = 'none';
+    iframe.style.margin = '0';
+    iframe.style.padding = '0';
+
+    doc.body.style.margin = '0';
+    doc.body.style.padding = '0';
+    doc.body.style.overflow = 'hidden';
+    doc.body.appendChild(iframe);
+
+    window.location.replace('https://google.com');
+  };
 
   // Laptop Apps state
   const [laptopSection, setLaptopSection] = useState<'working' | 'pending' | 'info' | 'methods'>('working');
@@ -244,6 +452,7 @@ export default function App() {
   return (
     <div className="flex flex-col h-screen w-screen border-imm-border border-8 box-border overflow-hidden selection:bg-imm-accent/30 bg-imm-bg">
       {/* Top Category Bar */}
+      {!isTopBarHidden && (
       <div className={`bg-imm-sidebar border-b border-imm-border shrink-0 flex items-center px-6 overflow-x-auto no-scrollbar py-3 gap-8 z-50 transition-opacity duration-300 ${selectedMovie || activeMethod || activeExtra ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
         <div className="mr-6 shrink-0">
           <img src="https://raw.githubusercontent.com/1sunW/ICONS-FOR-LINKS/refs/heads/main/Helium-Logo.png" alt="Helium" className="h-12 w-auto" />
@@ -260,6 +469,7 @@ export default function App() {
           ))}
         </div>
       </div>
+      )}
 
       <div className="flex flex-1 overflow-hidden relative">
         {/* Sidebar Navigation (Context Sensitive) */}
@@ -398,73 +608,81 @@ export default function App() {
             </motion.div>
           )}
 
-          {/* Header */}
-          <header className={`h-20 shrink-0 px-6 lg:px-10 flex items-center justify-between border-b border-imm-border z-[100] sticky top-0 bg-imm-bg/95 backdrop-blur-md shadow-sm transition-opacity duration-300 ${selectedMovie || activeMethod || activeExtra ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-            <div className="flex items-center gap-4">
-              <h2 className="serif text-xl tracking-wide">{activeCategory} View</h2>
-              
-            {activeCategory === 'Movies' && (
-                <div className="flex items-center gap-3 ml-4">
-                  <select 
-                    value={activeView} 
-                    onChange={(e) => setActiveView(e.target.value as 'discovery' | 'watchlist' | 'library')}
-                    className="bg-imm-card border border-imm-border text-imm-text text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-lg focus:outline-none focus:border-imm-accent"
-                  >
-                    <option value="discovery">Discovery</option>
-                    <option value="watchlist">Watchlist</option>
-                    <option value="library">Library</option>
-                  </select>
-                </div>
-              )}
-            </div>
 
-            <div className="relative flex-1 max-w-md mx-6">
-              <Search className="absolute inset-y-0 left-0 pl-3 flex items-center h-full w-4 h-4 text-imm-text/40 pointer-events-none" />
-              <input 
-                type="text" 
-                placeholder={`Search ${activeCategory === 'Home' ? 'everything' : activeCategory.toLowerCase()}...`} 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-imm-card border border-imm-border rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-imm-accent transition-colors text-imm-text"
-              />
-            </div>
 
-            <div className="flex items-center gap-4">
+          {/* Sub Header */}
+          <div className={`h-12 shrink-0 px-6 lg:px-10 flex items-center justify-between border-b border-imm-border bg-imm-card z-[90] ${selectedMovie || activeMethod || activeExtra ? 'hidden' : ''}`}>
+            <div className="flex items-center gap-4 text-xs font-medium">
+              <button 
+                onClick={() => setIsTopBarHidden(!isTopBarHidden)}
+                className="flex items-center justify-center w-6 h-6 hover:text-imm-accent transition-colors"
+                title={isTopBarHidden ? "Show Nav" : "Hide Nav"}
+              >
+                {isTopBarHidden ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+              </button>
+              <div className="w-px h-4 bg-imm-border"></div>
+              <button 
+                onClick={() => setIsSettingsOpen(true)}
+                className="flex items-center justify-center w-6 h-6 hover:text-imm-accent transition-colors"
+                title="Settings"
+              >
+                <Settings className="w-4 h-4" />
+              </button>
+              <div className="w-px h-4 bg-imm-border"></div>
+              <button 
+                onClick={() => setIsChangelogOpen(true)}
+                className="flex items-center justify-center w-6 h-6 hover:text-imm-accent transition-colors"
+                title="Updates"
+              >
+                <Zap className="w-4 h-4" />
+              </button>
+              <div className="w-px h-4 bg-imm-border"></div>
               <a 
                 href="https://discord.gg/3KDAKzBDg4"
                 target="_blank"
                 rel="noreferrer"
-                className="w-10 h-10 rounded-full border-2 border-[#5865F2]/50 p-0.5 flex items-center justify-center bg-gradient-to-br from-[#5865F2] to-[#4c1d95] hover:scale-105 hover:border-[#5865F2] transition-all cursor-pointer"
-                aria-label="Join Discord Server"
+                className="flex items-center justify-center w-6 h-6 hover:text-[#5865F2] transition-colors"
+                title="Join Discord Server"
               >
-                <i className="fa-brands fa-discord text-white text-lg"></i>
+                <i className="fa-brands fa-discord text-base"></i>
               </a>
             </div>
-          </header>
+            
+            <div className="flex items-center gap-4 text-xs font-medium text-imm-text/70">
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4" />
+                <span>{timeStr || '--:--'}</span>
+              </div>
+              <div className="w-px h-4 bg-imm-border"></div>
+              <div className="flex items-center gap-2">
+                <Battery className="w-4 h-4" />
+                <span>{batteryLevel !== null ? `${batteryLevel}%` : '--%'}</span>
+              </div>
+            </div>
+          </div>
 
-          {/* Changelog Toggle and Panel */}
-          <div className="fixed right-0 top-1/2 -translate-y-1/2 z-[1000] flex items-center">
-            <button 
-              onClick={() => setIsChangelogOpen(!isChangelogOpen)}
-              className="bg-imm-accent text-black w-10 h-12 rounded-l-2xl flex items-center justify-center hover:bg-imm-accent-hover transition-all shadow-2xl"
-              aria-label="Toggle Changelog"
-            >
+          {/* Changelog Modal */}
+          <AnimatePresence>
+            {isChangelogOpen && (
               <motion.div
-                animate={{ rotate: isChangelogOpen ? 180 : 0 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-[1000] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+                onClick={() => setIsChangelogOpen(false)}
               >
-                <ChevronRight className="w-6 h-6" />
-              </motion.div>
-            </button>
-
-            <AnimatePresence>
-              {isChangelogOpen && (
                 <motion.div
-                  initial={{ x: '100%' }}
-                  animate={{ x: 0 }}
-                  exit={{ x: '100%' }}
-                  transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                  className="w-80 h-[80vh] bg-imm-card border border-imm-border rounded-l-[2rem] shadow-2xl p-8 overflow-y-auto backdrop-blur-xl"
+                  initial={{ scale: 0.95 }}
+                  animate={{ scale: 1 }}
+                  onClick={e => e.stopPropagation()}
+                  className="bg-imm-card border border-imm-border rounded-3xl p-8 max-w-2xl w-full h-[80vh] overflow-y-auto shadow-2xl relative"
                 >
+                  <button 
+                    onClick={() => setIsChangelogOpen(false)}
+                    className="absolute top-6 right-6 p-2 rounded-full hover:bg-white/10 transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
                   <h2 className="serif text-3xl mb-8 text-white flex items-center gap-3 italic">
                      Full Changelog
                   </h2>
@@ -495,11 +713,219 @@ export default function App() {
                     ))}
                   </ul>
                 </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Settings Modal */}
+          <AnimatePresence>
+            {isSettingsOpen && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className={`fixed inset-0 z-[1000] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 ${isSettingsFullscreen ? "!p-0" : ""}`}
+                onClick={() => { setIsSettingsOpen(false); setIsSettingsFullscreen(false); }}
+              >
+                <motion.div
+                  initial={{ scale: 0.95 }}
+                  animate={{ scale: 1 }}
+                  onClick={e => e.stopPropagation()}
+                  className={`bg-imm-card border border-imm-border rounded-3xl overflow-hidden shadow-2xl relative flex flex-col ${isSettingsFullscreen ? "!rounded-none !w-screen !h-screen" : "w-[90vw] max-w-4xl h-[80vh] max-h-[700px]"}`}
+                >
+                  <div className="flex h-full">
+                    {/* Settings Sidebar */}
+                    <div className="w-64 bg-imm-sidebar border-r border-imm-border p-6 flex flex-col gap-2">
+                       <h2 className="serif text-2xl mb-6 flex items-center gap-2"><Settings className="w-6 h-6"/> Settings</h2>
+                       <button onClick={() => setSettingsTab('theme')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${settingsTab === 'theme' ? 'bg-imm-accent text-black' : 'hover:bg-white/5 text-imm-text/70 hover:text-white'}`}>
+                          <Palette className="w-5 h-5"/> Theme
+                       </button>
+                       <button onClick={() => setSettingsTab('cloak')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${settingsTab === 'cloak' ? 'bg-imm-accent text-black' : 'hover:bg-white/5 text-imm-text/70 hover:text-white'}`}>
+                          <Globe className="w-5 h-5"/> Cloak
+                       </button>
+                       <button onClick={() => setSettingsTab('language')} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${settingsTab === 'language' ? 'bg-imm-accent text-black' : 'hover:bg-white/5 text-imm-text/70 hover:text-white'}`}>
+                          <Languages className="w-5 h-5"/> Language
+                       </button>
+                    </div>
+                    {/* Settings Content */}
+                    <div className="flex-1 p-8 overflow-y-auto relative">
+                       <div className="absolute top-6 right-6 flex gap-2">
+                         <button 
+                            className="bg-imm-sidebar text-imm-text p-2 rounded-full border border-imm-border hover:bg-white/10 transition-all"
+                            onClick={() => setIsSettingsFullscreen(!isSettingsFullscreen)}
+                          >
+                            {isSettingsFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+                          </button>
+                         <button 
+                            className="bg-imm-sidebar text-imm-text p-2 rounded-full border border-imm-border hover:bg-red-500 hover:text-white transition-all"
+                            onClick={() => { setIsSettingsOpen(false); setIsSettingsFullscreen(false); }}
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                       </div>
+
+                       {settingsTab === 'theme' && (
+                         <div>
+                            <h3 className="text-xl font-bold mb-6">Select Theme</h3>
+                            <div className="grid grid-cols-2 gap-4">
+                               {['Original Helium', 'Light', 'Midnight', 'Hacker'].map(theme => (
+                                 <button 
+                                    key={theme}
+                                    onClick={() => setCurrentTheme(theme)}
+                                    className={`p-6 rounded-2xl border ${currentTheme === theme ? 'border-imm-accent bg-imm-accent/10' : 'border-imm-border bg-imm-sidebar hover:border-imm-text/30'} flex items-center justify-between transition-all`}
+                                 >
+                                    <span className="font-medium">{theme}</span>
+                                    {currentTheme === theme && <CheckCircle2 className="w-5 h-5 text-imm-accent" />}
+                                 </button>
+                               ))}
+                            </div>
+                         </div>
+                       )}
+
+                       {settingsTab === 'cloak' && (
+                         <div>
+                            <h3 className="text-xl font-bold mb-6">Tab Cloaking</h3>
+                            <p className="text-sm text-imm-text/60 mb-8 max-w-lg leading-relaxed">
+                               Cloaking opens Helium in an about:blank tab with a disguised title and icon to hide it from your browsing history and make it appear like a regular tab.
+                            </p>
+
+                            <div className="bg-imm-sidebar border border-imm-border rounded-2xl p-6 mb-6">
+                               <label className="block text-sm font-bold mb-3 text-imm-text/80">Select Preset</label>
+                               <select 
+                                  value={cloakSelection}
+                                  onChange={(e) => setCloakSelection(e.target.value)}
+                                  className="w-full bg-imm-card border border-imm-border text-imm-text px-4 py-3 rounded-xl focus:outline-none focus:border-imm-accent mb-6"
+                               >
+                                  {CLOAK_PRESETS.map(preset => (
+                                     <option key={preset.name} value={preset.name}>{preset.name}</option>
+                                  ))}
+                               </select>
+
+                               {cloakSelection === 'Custom' && (
+                                 <div className="space-y-4 mb-6">
+                                    <div>
+                                      <label className="block text-xs font-bold mb-2 text-imm-text/60">Tab Title</label>
+                                      <input 
+                                        type="text" 
+                                        value={customCloakName}
+                                        onChange={(e) => setCustomCloakName(e.target.value)}
+                                        placeholder="e.g. Google Docs"
+                                        className="w-full bg-imm-card border border-imm-border text-imm-text px-4 py-3 rounded-xl focus:outline-none focus:border-imm-accent"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="block text-xs font-bold mb-2 text-imm-text/60">Favicon URL</label>
+                                      <input 
+                                        type="text" 
+                                        value={customCloakIcon}
+                                        onChange={(e) => setCustomCloakIcon(e.target.value)}
+                                        placeholder="https://example.com/favicon.ico"
+                                        className="w-full bg-imm-card border border-imm-border text-imm-text px-4 py-3 rounded-xl focus:outline-none focus:border-imm-accent"
+                                      />
+                                    </div>
+                                 </div>
+                               )}
+
+                               <button 
+                                 onClick={handleOpenCloak}
+                                 className="bg-imm-accent text-black px-8 py-3 rounded-xl font-bold hover:bg-imm-accent-hover transition-colors flex items-center justify-center gap-2 w-full"
+                               >
+                                 <Globe className="w-5 h-5"/> Open Now
+                               </button>
+                            </div>
+                         </div>
+                       )}
+
+                       {settingsTab === 'language' && (
+                         <div className="space-y-8">
+                            <div>
+                               <h3 className="text-xl font-bold mb-6">Language & Region</h3>
+                               <div className="space-y-6">
+                                  {/* Language */}
+                                  <div className="bg-imm-sidebar border border-imm-border rounded-2xl p-6">
+                                     <label className="block text-sm font-bold mb-3 text-imm-text/80">Display Language</label>
+                                     <select 
+                                        value={language}
+                                        onChange={(e) => handleLanguageChange(e.target.value)}
+                                        className="w-full bg-imm-card border border-imm-border text-imm-text px-4 py-3 rounded-xl focus:outline-none focus:border-imm-accent"
+                                     >
+                                        {LANGUAGES.map(lang => (
+                                           <option key={lang} value={lang}>{lang}</option>
+                                        ))}
+                                     </select>
+                                  </div>
+
+                                  {/* Time Format & Zone */}
+                                  <div className="bg-imm-sidebar border border-imm-border rounded-2xl p-6 space-y-6">
+                                     <div className="flex items-center justify-between">
+                                        <div>
+                                           <label className="block text-sm font-bold mb-1 text-imm-text/80">Military Time (24-hour)</label>
+                                           <span className="text-xs text-imm-text/60">Use 24-hour clock format</span>
+                                        </div>
+                                        <button 
+                                           onClick={() => setUseMilitaryTime(!useMilitaryTime)}
+                                           className={`w-12 h-6 rounded-full transition-colors relative ${useMilitaryTime ? 'bg-imm-accent' : 'bg-imm-card border border-imm-border'}`}
+                                        >
+                                           <div className={`w-5 h-5 rounded-full ${useMilitaryTime ? 'bg-black' : 'bg-white'} absolute top-0.5 transition-all w-5 h-5 ${useMilitaryTime ? 'left-6' : 'left-0.5'}`} />
+                                        </button>
+                                     </div>
+
+                                     <div className="h-px bg-imm-border w-full"></div>
+
+                                     <div>
+                                        <label className="block text-sm font-bold mb-3 text-imm-text/80">Time Zone</label>
+                                        <select 
+                                           value={timeZone}
+                                           onChange={(e) => setTimeZone(e.target.value)}
+                                           className="w-full bg-imm-card border border-imm-border text-imm-text px-4 py-3 rounded-xl focus:outline-none focus:border-imm-accent"
+                                        >
+                                           {TIME_ZONES.map(tz => (
+                                              <option key={tz.value} value={tz.value}>{tz.label}</option>
+                                           ))}
+                                        </select>
+                                     </div>
+                                  </div>
+                               </div>
+                            </div>
+                         </div>
+                       )}
+                    </div>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <div className={`flex-1 flex flex-col gap-10 ${activeCategory === 'Games' ? '' : 'p-6 lg:p-10'}`}>
+            {activeCategory !== 'Home' && !selectedMovie && !activeMethod && !activeExtra && (
+              <div className={`flex flex-col md:flex-row items-start md:items-center justify-between gap-4 w-full max-w-7xl mx-auto ${activeCategory === 'Games' ? 'px-6 mt-6' : ''}`}>
+                 <div className="flex items-center gap-4">
+                   <h2 className="serif text-3xl font-bold tracking-wide text-white capitalize">{activeCategory}</h2>
+                   {activeCategory === 'Movies' && (
+                     <select 
+                       value={activeView} 
+                       onChange={(e) => setActiveView(e.target.value as 'discovery' | 'watchlist' | 'library')}
+                       className="bg-imm-card border border-imm-border text-imm-text text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-lg focus:outline-none focus:border-imm-accent font-bold"
+                     >
+                       <option value="discovery">Discovery</option>
+                       <option value="watchlist">Watchlist</option>
+                       <option value="library">Library</option>
+                     </select>
+                   )}
+                 </div>
+                 <div className="relative group w-full md:w-72 lg:w-96">
+                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 group-hover:text-imm-accent transition-colors" />
+                   <input
+                     type="text"
+                     placeholder={`Search ${activeCategory}...`}
+                     value={searchQuery}
+                     onChange={(e) => setSearchQuery(e.target.value)}
+                     className="w-full bg-imm-sidebar border border-imm-border rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-imm-accent transition-all text-white placeholder:text-white/40 shadow-sm"
+                   />
+                 </div>
+              </div>
+            )}
+            
             {activeCategory === 'Home' && (
               <motion.div 
                 initial={{ opacity: 0 }} 
