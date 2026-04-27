@@ -55,6 +55,7 @@ export default function App() {
   const [isHydrogenChatFullscreen, setIsHydrogenChatFullscreen] = useState(false);
   const [isEaglercraftOpen, setIsEaglercraftOpen] = useState(false);
   const [isEaglercraftFullscreen, setIsEaglercraftFullscreen] = useState(false);
+  const [isChangelogOpen, setIsChangelogOpen] = useState(false);
 
   // Laptop Apps state
   const [laptopSection, setLaptopSection] = useState<'working' | 'pending' | 'info' | 'methods'>('working');
@@ -441,6 +442,63 @@ export default function App() {
             </div>
           </header>
 
+          {/* Changelog Toggle and Panel */}
+          <div className="fixed right-0 top-1/2 -translate-y-1/2 z-[1000] flex items-center">
+            <button 
+              onClick={() => setIsChangelogOpen(!isChangelogOpen)}
+              className="bg-imm-accent text-black w-10 h-12 rounded-l-2xl flex items-center justify-center hover:bg-imm-accent-hover transition-all shadow-2xl"
+              aria-label="Toggle Changelog"
+            >
+              <motion.div
+                animate={{ rotate: isChangelogOpen ? 180 : 0 }}
+              >
+                <ChevronRight className="w-6 h-6" />
+              </motion.div>
+            </button>
+
+            <AnimatePresence>
+              {isChangelogOpen && (
+                <motion.div
+                  initial={{ x: '100%' }}
+                  animate={{ x: 0 }}
+                  exit={{ x: '100%' }}
+                  transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                  className="w-80 h-[80vh] bg-imm-card border border-imm-border rounded-l-[2rem] shadow-2xl p-8 overflow-y-auto backdrop-blur-xl"
+                >
+                  <h2 className="serif text-3xl mb-8 text-white flex items-center gap-3 italic">
+                     Full Changelog
+                  </h2>
+                  <ul className="space-y-6">
+                    {[
+                      { date: '04/27/2026', title: 'RELEASE OF V2', details: 'V2 IS OUT https://heliumv2.acelockedin.workers.dev' },
+                      { date: '04/20/2026', title: 'v2.2', details: 'A-B Anime DONE. All games in one, credits to DominumNetwork and their team. 190k visits, can we hit 200k before May? Truly thank you guys.' },
+                      { date: '04/16/2026', title: 'v2.1', details: "New music section incoming. 150k visits. I can't believe it, thank y'all. Working on anime. Been M.I.A for so long." },
+                      { date: '02/28/2026', title: 'v2.0', details: 'Finished the TV Shows. Partnered with Axiom and Axis. Added a copyright on all of my pages, a Discord server, and gn-math games.' },
+                      { date: '02/21/2026', title: 'v1.9', details: 'Rework on Requests page. Went through a lot of requests and partnered with GRAND and Voxel. Now working on anime, hopefully getting themes on to the home page. Enjoy!' },
+                      { date: '02/19/2026', title: 'v1.8', details: 'Home and Nav Menu combined.' },
+                      { date: '02/17/2026', title: 'v1.7', details: 'Added more games. Added Gimkit hacks. Left a note in Updates. Thanks for 16k visits.' },
+                      { date: '02/07/2026', title: 'v1.6', details: 'Dropped a huge update. Added a bunch of new proxies, hack page, changed the background and the big star, removing the password. Partnered with M3T4L, ChillZone, and Chill Kirb Central.' },
+                      { date: '02/06/2026', title: 'v1.5', details: 'Added AI + partner Dominum Network.' },
+                      { date: '02/04/2026', title: 'v1.4', details: 'Suspicious countdown page.' },
+                      { date: '02/01/2026', title: 'v1.3', details: 'Back working on Helium.' },
+                      { date: '05/11/2025', title: 'v1.2', details: 'Renamed SparkZone to Helium.' },
+                      { date: '05/05/2025', title: 'v1.1', details: 'Renamed SparkFlix to SparkZone.' },
+                      { date: '03/05/2025', title: 'v1.0', details: 'Initial release.' }
+                    ].map((update, idx) => (
+                      <li key={idx} className="group border-b border-white/5 pb-6 last:border-0">
+                        <div className="text-[10px] uppercase tracking-widest text-imm-accent font-bold mb-2 flex items-center gap-2">
+                           {update.date}
+                        </div>
+                        <div className="text-white font-bold text-sm mb-1">{update.title}</div>
+                        <div className="text-xs text-imm-text/60 leading-relaxed font-light">{update.details}</div>
+                      </li>
+                    ))}
+                  </ul>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
           <div className={`flex-1 flex flex-col gap-10 ${activeCategory === 'Games' ? '' : 'p-6 lg:p-10'}`}>
             {activeCategory === 'Home' && (
               <motion.div 
@@ -461,6 +519,20 @@ export default function App() {
                     >
                       Start Exploring
                     </button>
+                    
+                    {/* Latest Change display */}
+                    <div className="mt-12 pt-12 border-t border-white/5">
+                      <div className="flex items-center gap-4 text-sm">
+                        <span className="bg-imm-accent/10 text-imm-accent px-3 py-1 rounded-full font-bold text-[10px] uppercase tracking-wider">Latest Update</span>
+                        <div className="flex items-center gap-2 text-imm-text/60">
+                          <span className="font-bold">04/27/2026:</span>
+                          <span className="font-medium">RELEASE OF V2 IS OUT</span>
+                          <a href="https://heliumv2.acelockedin.workers.dev" target="_blank" rel="noreferrer" className="text-imm-accent hover:underline flex items-center gap-1 ml-2">
+                            heliumv2.acelockedin.workers.dev <ExternalLink className="w-3 h-3" />
+                          </a>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                   <div className="absolute top-0 right-0 p-12 opacity-10">
                     <Zap className="w-64 h-64" />
