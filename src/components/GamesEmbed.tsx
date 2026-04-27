@@ -16,12 +16,12 @@ export default function GamesEmbed() {
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 <style>
   :root {
-    --bg: #0b0a16;
-    --accent: #7a5cff;
-    --blue: #00bfff;
-    --text: #e6e6ff;
-    --surface: rgba(255, 255, 255, 0.05);
-    --border: rgba(255, 255, 255, 0.1);
+    --bg: #07050a;
+    --accent: #a855f7;
+    --blue: #a855f7;
+    --text: #f5f3ff;
+    --surface: rgba(18, 11, 33, 0.7);
+    --border: #23163a;
   }
 
   * { box-sizing: border-box; outline: none; }

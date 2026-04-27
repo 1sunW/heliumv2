@@ -39,7 +39,8 @@ import {
   EyeOff,
   Film,
   Terminal,
-  Plus
+  Plus,
+  NotebookText
 } from 'lucide-react';
 import GamesEmbed from './components/GamesEmbed';
 import airChatHtml from './components/AirChat.html?raw';
@@ -66,10 +67,26 @@ export default function App() {
   const [isEaglercraftFullscreen, setIsEaglercraftFullscreen] = useState(false);
   const [isChangelogOpen, setIsChangelogOpen] = useState(false);
   const [isTopBarHidden, setIsTopBarHidden] = useState(false);
-  
+  const [isNotepadOpen, setIsNotepadOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdminViewOpen, setIsAdminViewOpen] = useState(false);
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [password, setPassword] = useState('');
+  const [systemStatusClickCount, setSystemStatusClickCount] = useState(0);
+
+  // Added timer for notepad functionality
+  const [notepadTime, setNotepadTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setNotepadTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+
   // Settings & Customization state
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isSettingsFullscreen, setIsSettingsFullscreen] = useState(false);
+  const [settingsFullscreenClickCount, setSettingsFullscreenClickCount] = useState(0);
   const [settingsTab, setSettingsTab] = useState<'theme' | 'cloak' | 'language'>('theme');
   const [currentTheme, setCurrentTheme] = useState('Original Helium');
   
@@ -659,9 +676,38 @@ export default function App() {
               >
                 <i className="fa-brands fa-discord text-base"></i>
               </a>
+              {isAdmin && (
+                <>
+                  <div className="w-px h-4 bg-imm-border"></div>
+                  <button
+                    onClick={() => setIsNotepadOpen(!isNotepadOpen)}
+                    className="flex items-center justify-center w-6 h-6 hover:text-imm-accent transition-colors"
+                    title="Toggle Notepad"
+                  >
+                    <NotebookText className="w-4 h-4" />
+                  </button>
+                </>
+              )}
             </div>
             
             <div className="flex items-center gap-4 text-xs font-medium text-imm-text/70">
+              {isNotepadOpen && (
+                <motion.div
+                    drag
+                    dragMomentum={false}
+                    className="fixed bg-imm-sidebar border border-imm-border p-4 rounded-xl z-[3000] w-64 shadow-2xl flex flex-col gap-2"
+                    style={{ top: '100px', left: '100px' }}
+                >
+                    <div className="flex justify-between items-center cursor-move text-imm-text/60">
+                        <span className="font-bold text-xs uppercase">Notepad</span>
+                        <button onClick={() => setIsNotepadOpen(false)}><X className="w-4 h-4" /></button>
+                    </div>
+                    <textarea
+                        className="w-full h-32 bg-imm-card border border-imm-border p-2 rounded text-sm text-imm-text"
+                        placeholder="Type here..."
+                    />
+                </motion.div>
+            )}
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4" />
                 <span>{timeStr || '--:--'}</span>
@@ -730,6 +776,93 @@ export default function App() {
             )}
           </AnimatePresence>
 
+          {/* Password Modal */}
+          <AnimatePresence>
+            {isPasswordModalOpen && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-[2000] bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
+                onClick={() => setIsPasswordModalOpen(false)}
+              >
+                <motion.div
+                  initial={{ scale: 0.95 }}
+                  animate={{ scale: 1 }}
+                  onClick={e => e.stopPropagation()}
+                  className="bg-black border border-imm-accent/50 rounded-3xl p-8 max-w-sm w-full shadow-2xl relative"
+                >
+                  <h2 className="text-xl font-bold mb-6 text-white">Enter Password</h2>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full bg-imm-sidebar border border-imm-border rounded-xl px-4 py-3 text-white mb-6 focus:outline-none focus:border-imm-accent"
+                    placeholder="Enter password..."
+                  />
+                  <div className="flex justify-end gap-4">
+                    <button onClick={() => setIsPasswordModalOpen(false)} className="px-4 py-2 text-imm-text/60 hover:text-white transition-colors">Cancel</button>
+                    <button 
+                      onClick={() => {
+                        if (password === 'helium') {
+                          setIsAdmin(true);                
+                          setIsAdminViewOpen(true);
+                          setIsPasswordModalOpen(false);
+                          setPassword('');
+                        } else {
+                          alert('Incorrect password!');
+                          setPassword('');
+                        }
+                      }}
+                      className="px-6 py-2 bg-imm-accent text-black rounded-lg font-bold hover:bg-imm-accent-hover transition-colors"
+                    >
+                      Login
+                    </button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Admin Modal */}
+          <AnimatePresence>
+            {isAdminViewOpen && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-[2000] bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
+                onClick={() => setIsAdminViewOpen(false)}
+              >
+                <motion.div
+                  initial={{ scale: 0.95 }}
+                  animate={{ scale: 1 }}
+                  onClick={e => e.stopPropagation()}
+                  className="bg-black border border-green-500/50 rounded-3xl p-8 max-w-2xl w-full shadow-2xl relative"
+                >
+                  <button 
+                    onClick={() => setIsAdminViewOpen(false)}
+                    className="absolute top-6 right-6 p-2 rounded-full hover:bg-white/10 transition-colors text-green-500"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                  <h2 className="serif text-3xl mb-8 text-green-500 flex items-center gap-3 italic">
+                     Admin Dashboard
+                  </h2>
+                  <div className="text-green-500 font-mono text-sm space-y-4">
+                     <p>System Status: Nominal</p>
+                     <p>User Count: [OMITTED]</p>
+                     <p>Total Visits: [OMITTED]</p>
+                     <p>Last Update: {new Date().toLocaleDateString()}</p>
+                     <div className="mt-8 border-t border-green-500/20 pt-4">
+                        <p className="text-white/60 italic font-light">Root access authorized.</p>
+                     </div>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {/* Settings Modal */}
           <AnimatePresence>
             {isSettingsOpen && (
@@ -765,7 +898,16 @@ export default function App() {
                        <div className="absolute top-6 right-6 flex gap-2">
                          <button 
                             className="bg-imm-sidebar text-imm-text p-2 rounded-full border border-imm-border hover:bg-white/10 transition-all"
-                            onClick={() => setIsSettingsFullscreen(!isSettingsFullscreen)}
+                            onClick={() => {
+                              const newCount = settingsFullscreenClickCount + 1;
+                              if (newCount >= 3) {
+                                setSettingsFullscreenClickCount(0);
+                                window.location.href = 'https://forms.gle/MwgrQf9WRWMPGuXh8';
+                              } else {
+                                setSettingsFullscreenClickCount(newCount);
+                                setIsSettingsFullscreen(!isSettingsFullscreen);
+                              }
+                            }}
                           >
                             {isSettingsFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
                           </button>
@@ -1469,7 +1611,15 @@ export default function App() {
                         { title: 'Our Staff', icon: Shield, action: () => setActiveExtra({ title: 'Our Staff', content: 'Ace', subtext: 'Owner' }) },
                         { title: 'Partners', icon: Globe, action: () => setActiveExtra({ title: 'Partners', partners: PARTNERS }) },
                         { title: 'Requests', icon: MessageSquare, action: () => window.open('https://docs.google.com/forms/d/e/1FAIpQLSfa3NfgBDgXeHHOugtGK9ilhmxeBUtKGowdGwMf8-p4I-huEg/viewform?usp=sharing&ouid=109958091358583321640', '_blank') },
-                        { title: 'Info', icon: Info, action: () => setActiveExtra({ title: 'System Status', content: 'We are hearing about a rumor that you can\'t access the movies. "The number of allowed playback" or something like that. New method: Exit the tab, wait for 2 minutes, and come back on to the movie.' }) },
+                        { title: 'Info', icon: Info, action: () => {
+                          if (systemStatusClickCount + 1 >= 3) {
+                            setSystemStatusClickCount(0);
+                            setIsPasswordModalOpen(true);
+                          } else {
+                            setSystemStatusClickCount(prev => prev + 1);
+                            setActiveExtra({ title: 'System Status', content: 'We are hearing about a rumor that you can\'t access the movies. "The number of allowed playback" or something like that. New method: Exit the tab, wait for 2 minutes, and come back on to the movie.' });
+                          }
+                        }},
                         { title: 'Leaks', icon: Zap, action: () => setActiveExtra({ title: 'Deep Leaks', content: 'New theme?' }) },
                         { title: 'Credits', icon: Sparkles, action: () => setActiveExtra({ title: 'Helium Credits', content: 'Thank you P-Stream, Chill Zone, M3T4L, Ultimate Game Stash (UGS), and Chill Kirb Central.' }) },
                         { title: 'Air', icon: Wind, action: () => setIsAirChatOpen(true) },
