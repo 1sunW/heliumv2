@@ -36,7 +36,10 @@ import {
   Palette,
   Languages,
   Eye,
-  EyeOff
+  EyeOff,
+  Film,
+  Terminal,
+  Plus
 } from 'lucide-react';
 import GamesEmbed from './components/GamesEmbed';
 import airChatHtml from './components/AirChat.html?raw';
@@ -462,9 +465,19 @@ export default function App() {
             <button
               key={cat}
               onClick={() => handleCategorySelect(cat)}
-              className={`text-[10px] uppercase tracking-[0.2em] transition-all whitespace-nowrap px-1 py-1 border-b-2 ${activeCategory === cat ? 'text-imm-accent border-imm-accent font-bold' : 'text-imm-text/40 border-transparent hover:text-imm-text/80'}`}
+              className={`transition-all px-1 py-1 border-b-2 flex items-center justify-center ${activeCategory === cat ? 'text-imm-accent border-imm-accent' : 'text-imm-text/40 border-transparent hover:text-imm-text/80'}`}
+              title={cat}
             >
-              {cat}
+              {cat === 'Home' && <HomeIcon className="w-5 h-5 mx-2 my-1" />}
+              {cat === 'Movies' && <Film className="w-5 h-5 mx-2 my-1" />}
+              {cat === 'Games' && <Gamepad2 className="w-5 h-5 mx-2 my-1" />}
+              {cat === 'Anime' && <Sparkles className="w-5 h-5 mx-2 my-1" />}
+              {cat === 'TV Shows' && <Tv className="w-5 h-5 mx-2 my-1" />}
+              {cat === 'Proxies' && <Globe className="w-5 h-5 mx-2 my-1" />}
+              {cat === 'Music' && <MusicIcon className="w-5 h-5 mx-2 my-1" />}
+              {cat === 'Books' && <BookOpen className="w-5 h-5 mx-2 my-1" />}
+              {cat === 'Hacks' && <Terminal className="w-5 h-5 mx-2 my-1" />}
+              {cat === 'Extra' && <Plus className="w-5 h-5 mx-2 my-1" />}
             </button>
           ))}
         </div>
