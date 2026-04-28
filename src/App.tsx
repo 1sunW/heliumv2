@@ -151,31 +151,19 @@ export default function App() {
   useEffect(() => {
     // Basic theme injection targeting variables defined in Tailwind theme
     if (currentTheme === 'Light') {
-      document.documentElement.style.setProperty('--color-imm-bg', '#ffffff');
-      document.documentElement.style.setProperty('--color-imm-text', '#000000');
-      document.documentElement.style.setProperty('--color-imm-card', '#f3f4f6');
-      document.documentElement.style.setProperty('--color-imm-sidebar', '#e5e7eb');
-      document.documentElement.style.setProperty('--color-imm-border', '#d1d5db');
-    } else if (currentTheme === 'Midnight') {
-      document.documentElement.style.setProperty('--color-imm-bg', '#020617');
-      document.documentElement.style.setProperty('--color-imm-text', '#f8fafc');
-      document.documentElement.style.setProperty('--color-imm-card', '#0f172a');
-      document.documentElement.style.setProperty('--color-imm-sidebar', '#020617');
-      document.documentElement.style.setProperty('--color-imm-border', '#1e293b');
-    } else if (currentTheme === 'Hacker') {
-      document.documentElement.style.setProperty('--color-imm-bg', '#000000');
-      document.documentElement.style.setProperty('--color-imm-text', '#00ff00');
-      document.documentElement.style.setProperty('--color-imm-card', '#001100');
-      document.documentElement.style.setProperty('--color-imm-sidebar', '#000500');
-      document.documentElement.style.setProperty('--color-imm-border', '#003300');
-      document.documentElement.style.setProperty('--color-imm-accent', '#00ff00');
+      document.documentElement.setAttribute('data-theme', 'light'); // Not defined in css, will just fallback or we can use default
+    } else if (currentTheme === 'Ocean') {
+      document.documentElement.setAttribute('data-theme', 'ocean');
+    } else if (currentTheme === 'Matrix') {
+      document.documentElement.setAttribute('data-theme', 'matrix');
+    } else if (currentTheme === 'Violet') {
+      document.documentElement.setAttribute('data-theme', 'violet');
+    } else if (currentTheme === 'Halloween') {
+      document.documentElement.setAttribute('data-theme', 'halloween');
+    } else if (currentTheme === 'Chillzone Red') {
+      document.documentElement.setAttribute('data-theme', 'chillzonered');
     } else {
-      document.documentElement.style.removeProperty('--color-imm-bg');
-      document.documentElement.style.removeProperty('--color-imm-text');
-      document.documentElement.style.removeProperty('--color-imm-card');
-      document.documentElement.style.removeProperty('--color-imm-sidebar');
-      document.documentElement.style.removeProperty('--color-imm-border');
-      document.documentElement.style.removeProperty('--color-imm-accent');
+      document.documentElement.removeAttribute('data-theme');
     }
   }, [currentTheme]);
 
@@ -923,7 +911,7 @@ export default function App() {
                          <div>
                             <h3 className="text-xl font-bold mb-6">Select Theme</h3>
                             <div className="grid grid-cols-2 gap-4">
-                               {['Original Helium', 'Light', 'Midnight', 'Hacker'].map(theme => (
+                               {['Original Helium', 'Ocean', 'Matrix', 'Violet', 'Halloween', 'Chillzone Red'].map(theme => (
                                  <button 
                                     key={theme}
                                     onClick={() => setCurrentTheme(theme)}

@@ -954,7 +954,8 @@ function applyTheme(theme){
 (function(){
   const name = localStorage.getItem("dominum-theme") || "default";
   if(name === "custom"){
-    const custom = JSON.parse(localStorage.getItem("dominum-custom-theme") || "{}");
+    const customStr = localStorage.getItem("dominum-custom-theme");
+    const custom = (customStr && customStr !== "undefined") ? JSON.parse(customStr) : {};
     applyTheme(custom);
   } else applyTheme(themes[name]);
 })();
