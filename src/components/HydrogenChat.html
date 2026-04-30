@@ -290,7 +290,7 @@ particlesJS("particles-js", {
         })
       });
       
-      const data = await response.json();
+      let data; try { data = await response.json(); } catch(e) { console.warn("JSON Error: ", e); data = {}; }
       const aiText = data?.choices?.[0]?.message?.content || "An error occurred";
       
       conversationHistory.push({ role: "assistant", content: aiText });

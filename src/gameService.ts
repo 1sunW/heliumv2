@@ -34,7 +34,7 @@ export async function fetchGames(provider: string, proxy?: string): Promise<Game
   try {
     if (provider === 'blox') {
       const response = await fetch('https://cdn.jsdelivr.net/gh/tharun9772/tharun9772.github.io/games/games.json');
-      const data = await response.json();
+      let data; try { data = await response.json(); } catch(e) { console.warn("JSON Error: ", e); data = []; }
       return data.map((g: any, index: number) => {
         let cleanedUrl = g.url.replace('/app-viewer/?view=/', '/');
         if (!cleanedUrl.endsWith('index.html')) {
@@ -53,7 +53,7 @@ export async function fetchGames(provider: string, proxy?: string): Promise<Game
 
     if (provider === 'gn-math') {
       const response = await fetch("https://cdn.jsdelivr.net/gh/freebuisness/assets/zones.json");
-      const rawZones = await response.json();
+      let rawZones; try { rawZones = await response.json(); } catch(e) { console.warn("JSON Error: ", e); rawZones = []; }
       return rawZones.filter((g: any) => g.id !== -1 && !g.name.startsWith("[!]")).map((z: any, index: number) => {
         let coverUrl = (z.cover || "").replace('{COVER_URL}', '');
         if(coverUrl.startsWith('/')) coverUrl = coverUrl.substring(1);
@@ -70,7 +70,7 @@ export async function fetchGames(provider: string, proxy?: string): Promise<Game
 
     if (provider === 'elite') {
       const response = await fetch("https://cdn.jsdelivr.net/gh/elite-gamez/elite-gamez.github.io@main/games.json");
-      const data = await response.json();
+      let data; try { data = await response.json(); } catch(e) { console.warn("JSON Error: ", e); data = []; }
       return data.map((g: any, index: number) => ({
         id: `elite-${index}`,
         provider: 'elite',
@@ -83,7 +83,7 @@ export async function fetchGames(provider: string, proxy?: string): Promise<Game
 
     if (provider === 'sea-bean') {
       const response = await fetch("https://cdn.jsdelivr.net/gh/sea-bean-unblocked/sde@main/zzz.json");
-      const data = await response.json();
+      let data; try { data = await response.json(); } catch(e) { console.warn("JSON Error: ", e); data = []; }
       return data.map((g: any, index: number) => {
         let htmlUrl = g.html || g.url || "";
         if (htmlUrl.includes("{HTML_URL}")) {
@@ -115,7 +115,7 @@ export async function fetchGames(provider: string, proxy?: string): Promise<Game
       for (const repo of repos) {
         try {
           const r = await fetch(`https://api.github.com/repos/${repo}/contents/`);
-          const d = await r.json();
+          let d; try { d = await r.json(); } catch(e) { console.warn("JSON Error: ", e); d = []; }
           if (Array.isArray(d)) {
             d.forEach((f: any) => {
               if (f.type === "file" && f.name.startsWith("cl") && f.name.endsWith(".html")) {
@@ -139,7 +139,7 @@ export async function fetchGames(provider: string, proxy?: string): Promise<Game
 
     if (provider === 'truffled') {
       const response = await fetch("https://cdn.jsdelivr.net/gh/aukak/truffled@main/public/js/json/g.json");
-      const data = await response.json();
+      let data; try { data = await response.json(); } catch(e) { console.warn("JSON Error: ", e); data = []; }
       const base = proxy?.replace(/\/$/, "") || 'https://truffled.lol';
       return (data.games || []).map((g: any, index: number) => {
         let thumb = g.thumbnail || "";
@@ -162,7 +162,7 @@ export async function fetchGames(provider: string, proxy?: string): Promise<Game
 
     if (provider === 'seraph') {
       const response = await fetch('https://cdn.jsdelivr.net/gh/DominumNetwork/dominum@main/src/assets/libraries/seraph/games.json');
-      const data = await response.json();
+      let data; try { data = await response.json(); } catch(e) { console.warn("JSON Error: ", e); data = []; }
       return data.map((g: any, index: number) => {
         const gamePath = g.url.endsWith('index.html') ? g.url : g.url.replace(/\/?$/, '/index.html');
         return {
@@ -178,7 +178,7 @@ export async function fetchGames(provider: string, proxy?: string): Promise<Game
 
     if (provider === 'petezah') {
       const response = await fetch("https://cdn.jsdelivr.net/gh/PeteZah-G/singlefile-json@main/search.json");
-      const data = await response.json();
+      let data; try { data = await response.json(); } catch(e) { console.warn("JSON Error: ", e); data = []; }
       return (data.games || []).map((g: any, index: number) => {
         let finalUrl = g.url;
         if (finalUrl && !finalUrl.endsWith('index.html') && !finalUrl.match(/\.\w+$/)) {

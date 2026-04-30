@@ -512,7 +512,7 @@ async function loadGames() {
   try {
     if (provider === 'blox') {
       const response = await fetch('https://cdn.jsdelivr.net/gh/tharun9772/tharun9772.github.io/games/games.json');
-      const data = await response.json();
+      let data; try { data = await response.json(); } catch(e) { console.warn("JSON Error: ", e); data = []; }
       
       const bloxGames = data.map((g, index) => {
         let cleanedUrl = g.url.replace('/app-viewer/?view=/', '/');
@@ -534,7 +534,7 @@ async function loadGames() {
       allGames = [...allGames, ...bloxGames];
     } else if (provider === 'gn-math') {
       const response = await fetch("https://cdn.jsdelivr.net/gh/freebuisness/assets/zones.json");
-      const rawZones = await response.json();
+      let rawZones; try { rawZones = await response.json(); } catch(e) { console.warn("JSON Error: ", e); rawZones = []; }
       
       allGames = rawZones.filter(g => g.id !== -1 && !g.name.startsWith("[!]")).map((z, index) => {
         let coverUrl = (z.cover || "").replace('{COVER_URL}', '');
@@ -552,7 +552,7 @@ async function loadGames() {
 
     } else if (provider === 'elite') {
       const response = await fetch("https://cdn.jsdelivr.net/gh/elite-gamez/elite-gamez.github.io@main/games.json");
-      const data = await response.json();
+      let data; try { data = await response.json(); } catch(e) { console.warn("JSON Error: ", e); data = []; }
 
       allGames = data.map((g, index) => {
         let gameTitle = g.title || g.name || "Unknown Game";
@@ -573,7 +573,7 @@ async function loadGames() {
 
     } else if (provider === 'sea-bean') {
       const response = await fetch("https://cdn.jsdelivr.net/gh/sea-bean-unblocked/sde@main/zzz.json");
-      const data = await response.json();
+      let data; try { data = await response.json(); } catch(e) { console.warn("JSON Error: ", e); data = []; }
 
       allGames = data.map((g, index) => {
         let gameTitle = g.name || g.id || "Unknown Game";
@@ -612,7 +612,7 @@ async function loadGames() {
       for (const repo of repos) {
         try {
           const r = await fetch(\`https://api.github.com/repos/\${repo}/contents/\`);
-          const d = await r.json();
+          let d; try { d = await r.json(); } catch(e) { console.warn("JSON Error: ", e); d = []; }
 
           d.forEach(f => {
             if (f.type === "file" && f.name.startsWith("cl") && f.name.endsWith(".html")) {
@@ -647,7 +647,7 @@ async function loadGames() {
       }
 
       const response = await fetch("https://cdn.jsdelivr.net/gh/aukak/truffled@main/public/js/json/g.json");
-      const data = await response.json();
+      let data; try { data = await response.json(); } catch(e) { console.warn("JSON Error: ", e); data = []; }
       
       allGames = (data.games || []).map((g, index) => {
         let rawUrl = g.url; 
@@ -675,7 +675,7 @@ async function loadGames() {
 
     } else if (provider === 'seraph') {
         const response = await fetch('https://cdn.jsdelivr.net/gh/DominumNetwork/dominum@main/src/assets/libraries/seraph/games.json');
-        const data = await response.json();
+        let data; try { data = await response.json(); } catch(e) { console.warn("JSON Error: ", e); data = []; }
 
         allGames = data.map((g, index) => {
             const gamePath = g.url.endsWith('index.html') ? g.url : g.url.replace(/\\/?$/, '/index.html');
@@ -691,7 +691,7 @@ async function loadGames() {
         });
     } else if (provider === 'petezah') {
       const response = await fetch("https://cdn.jsdelivr.net/gh/PeteZah-G/singlefile-json@main/search.json");
-      const data = await response.json();
+      let data; try { data = await response.json(); } catch(e) { console.warn("JSON Error: ", e); data = []; }
 
       allGames = (data.games || []).map((g, index) => {
         let finalUrl = g.url;
