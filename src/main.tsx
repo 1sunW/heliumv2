@@ -2,10 +2,15 @@ import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
-import { registerSW } from 'virtual:pwa-register';
 
-// Register service worker for offline support
-registerSW({ immediate: true });
+// Unregister any existing service workers to fix 404 issues
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    for (let registration of registrations) {
+      registration.unregister();
+    }
+  });
+}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

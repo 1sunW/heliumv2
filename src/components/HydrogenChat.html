@@ -28,7 +28,12 @@ function applyTheme(theme) {
 }
 (function(){
   let data = localStorage.getItem(ACTIVE_THEME_KEY);
-  if (data && data !== "undefined") { try { applyTheme(JSON.parse(data)); } catch(e){} }
+  if (data) { 
+    data = data.trim();
+    if (data !== "undefined" && data !== "null") {
+      try { applyTheme(JSON.parse(data)); } catch(e){} 
+    }
+  }
 })();
 </script>
 

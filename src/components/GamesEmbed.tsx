@@ -954,8 +954,18 @@ function applyTheme(theme){
 (function(){
   const name = localStorage.getItem("dominum-theme") || "default";
   if(name === "custom"){
-    const customStr = localStorage.getItem("dominum-custom-theme");
-    const custom = (customStr && customStr !== "undefined") ? JSON.parse(customStr) : {};
+    let customStr = localStorage.getItem("dominum-custom-theme");
+    let custom = {};
+    if (customStr) {
+      customStr = customStr.trim();
+      if (customStr !== "undefined" && customStr !== "null") {
+        try {
+          custom = JSON.parse(customStr);
+        } catch (e) {
+          console.warn("Failed to parse dominum-custom-theme", e);
+        }
+      }
+    }
     applyTheme(custom);
   } else applyTheme(themes[name]);
 })();
