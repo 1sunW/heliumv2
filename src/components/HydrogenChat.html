@@ -30,8 +30,15 @@ function applyTheme(theme) {
   let data = localStorage.getItem(ACTIVE_THEME_KEY);
   if (data) { 
     data = data.trim();
-    if (data !== "undefined" && data !== "null") {
-      try { applyTheme(JSON.parse(data)); } catch(e){} 
+    if (data !== "" && data !== "undefined" && data !== "null") {
+      try { 
+        const parsed = JSON.parse(data);
+        if (parsed && typeof parsed === 'object') {
+          applyTheme(parsed); 
+        }
+      } catch(e){
+        console.warn("Failed to parse zgc_theme:", e);
+      } 
     }
   }
 })();

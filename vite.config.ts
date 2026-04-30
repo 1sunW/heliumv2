@@ -1,16 +1,12 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import {defineConfig, loadEnv} from 'vite';
 
 export default defineConfig(({mode}) => {
   const env = loadEnv(mode, '.', '');
   return {
     base: './',
-    build: {
-      assetsDir: 'assets',
-    },
     plugins: [
       react(), 
       tailwindcss(),
@@ -20,7 +16,7 @@ export default defineConfig(({mode}) => {
     },
     resolve: {
       alias: {
-        '@': path.resolve(path.dirname(fileURLToPath(import.meta.url)), '.'),
+        '@': path.resolve(__dirname, '.'),
       },
     },
     server: {

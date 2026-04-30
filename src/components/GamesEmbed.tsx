@@ -958,11 +958,14 @@ function applyTheme(theme){
     let custom = {};
     if (customStr) {
       customStr = customStr.trim();
-      if (customStr !== "undefined" && customStr !== "null") {
+      if (customStr !== "" && customStr !== "undefined" && customStr !== "null") {
         try {
-          custom = JSON.parse(customStr);
+          const parsed = JSON.parse(customStr);
+          if (parsed && typeof parsed === 'object') {
+            custom = parsed;
+          }
         } catch (e) {
-          console.warn("Failed to parse dominum-custom-theme", e);
+          console.warn("Failed to parse dominum-custom-theme:", e);
         }
       }
     }
