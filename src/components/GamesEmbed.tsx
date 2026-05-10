@@ -389,21 +389,6 @@ export default function GamesEmbed() {
 </div>
 
 <div id="noticeModal" class="alert-backdrop">
-  <div id="gameModal">
-    <div id="fullscreenHeader">
-      <h2 id="gameTitle">Game Title</h2>
-      <div class="header-controls">
-        <button id="blankBtn" class="header-btn" title="Open in about:blank tab"><i class="fa-solid fa-up-right-from-square"></i></button>
-        <button id="downloadBtn" class="header-btn" title="Download Game"><i class="fas fa-download"></i></button>
-        <button id="fullscreenBtn" class="header-btn" title="Fullscreen"><i class="fas fa-expand"></i></button>
-        <button id="closeFullscreen" class="header-btn" title="Close"><i class="fas fa-times"></i></button>
-      </div>
-    </div>
-    <iframe id="zoneFullscreenFrame"></iframe>
-  </div>
-</div>
-
-<div id="noticeModal" class="alert-backdrop">
   <div class="alert-modal">
     <h3>!Notice!</h3>
     <p>I do not own these links; they belong to the truffled community. Please don't get pissed off, if you want a link removed, dm me on discord (<strong>dominus.elitus</strong>). Y'all should support fr support them tho :)</p>
