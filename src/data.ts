@@ -558,6 +558,19 @@ export const MANGA: ContentItem[] = [
 
 export const MOVIES: ContentItem[] = [
     {
+        id: "m419",
+        title: "Michael",
+        description: "A biographical drama about the life of Michael Jackson.",
+        year: "2025",
+        rating: "8.5",
+        duration: "2h 30m",
+        genre: ["Biography", "Drama", "Music"],
+        image: "https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcQL2cOUD1HjXl3pCCXGiSC5jgGa2Iwlrty_DnkqCHlY9KcM9niZ",
+        mood: "Dramatic",
+        type: "movie",
+        driveLink: "https://drive.google.com/file/d/1OqJ14L50E0wHdYrTq6M5cEFoUjGl6ENB/view?usp=drive_link",
+    },
+    {
         id: "m1",
         title: "Deadpool and Wolverine",
         description: "Mercenary Deadpool teams with Wolverine for action-packed adventure.",

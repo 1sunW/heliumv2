@@ -27,10 +27,12 @@ function applyTheme(theme) {
   root.setProperty('--shadow-color', hexToRGBA(theme.glow || theme.accent, 0.4));
 }
 (function(){
+  const ACTIVE_THEME_KEY = 'zgc_theme_v2_active';
   let data = localStorage.getItem(ACTIVE_THEME_KEY);
-  if (data) { 
+  if (data && typeof data === 'string') { 
     data = data.trim();
-    if (data !== "" && data !== "undefined" && data !== "null") {
+    // Improved check for non-JSON strings that localStorage.getItem might return
+    if (data !== "" && data !== "undefined" && data !== "null" && data !== "[object Object]") {
       try { 
         const parsed = JSON.parse(data);
         if (parsed && typeof parsed === 'object') {

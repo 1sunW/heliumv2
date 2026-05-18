@@ -202,6 +202,8 @@ export default function GamesEmbed() {
     padding: 1.2rem 2rem;
     background: rgba(0, 0, 0, 0.4);
     border-bottom: 1px solid var(--border);
+    position: relative;
+    z-index: 10;
   }
 
   #gameTitle {
@@ -865,6 +867,13 @@ closeBtn.onclick = () => {
   currentGame = null;
 };
 
+// Exit modal on ESC key
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && overlay.style.display === 'flex') {
+    closeBtn.click();
+  }
+});
+
 overlay.onclick = (e) => {
   if (e.target === overlay) closeBtn.click();
 }
@@ -933,6 +942,7 @@ const themes = {
 };
 
 function applyTheme(theme){
+  if (!theme || typeof theme !== 'object') return;
   Object.entries(theme).forEach(([k,v])=>root.style.setProperty(k,v));
 }
 
@@ -941,9 +951,9 @@ function applyTheme(theme){
   if(name === "custom"){
     let customStr = localStorage.getItem("dominum-custom-theme");
     let custom = {};
-    if (customStr) {
+    if (customStr && typeof customStr === 'string') {
       customStr = customStr.trim();
-      if (customStr !== "" && customStr !== "undefined" && customStr !== "null") {
+      if (customStr !== "" && customStr !== "undefined" && customStr !== "null" && customStr !== "[object Object]") {
         try {
           const parsed = JSON.parse(customStr);
           if (parsed && typeof parsed === 'object') {
@@ -955,7 +965,10 @@ function applyTheme(theme){
       }
     }
     applyTheme(custom);
-  } else applyTheme(themes[name]);
+  } else {
+    const targetTheme = themes[name] || themes.default;
+    if (targetTheme) applyTheme(targetTheme);
+  }
 })();
 </script>
 </body>
