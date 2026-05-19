@@ -948,20 +948,17 @@ function applyTheme(theme){
 
 (function(){
   const name = localStorage.getItem("dominum-theme") || "default";
-  if(name === "custom"){
+    if(name === "custom"){
     let customStr = localStorage.getItem("dominum-custom-theme");
     let custom = {};
-    if (customStr && typeof customStr === 'string') {
-      customStr = customStr.trim();
-      if (customStr !== "" && customStr !== "undefined" && customStr !== "null" && customStr !== "[object Object]") {
-        try {
-          const parsed = JSON.parse(customStr);
-          if (parsed && typeof parsed === 'object') {
-            custom = parsed;
-          }
-        } catch (e) {
-          console.warn("Failed to parse dominum-custom-theme:", e);
+    if (customStr && typeof customStr === 'string' && customStr.trim() !== "" && customStr.trim() !== "undefined" && customStr.trim() !== "null") {
+      try {
+        const parsed = JSON.parse(customStr);
+        if (parsed && typeof parsed === 'object') {
+          custom = parsed;
         }
+      } catch (e) {
+        console.warn("Failed to parse dominum-custom-theme:", e);
       }
     }
     applyTheme(custom);

@@ -1,0 +1,51 @@
+{
+  "entities": {
+    "movie": {
+      "title": "Movie",
+      "description": "Represents a movie or other media content.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "year": { "type": "string" },
+        "rating": { "type": "string" },
+        "duration": { "type": "string" },
+        "genre": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "image": { "type": "string" },
+        "mood": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": ["movie", "anime", "tv", "book", "manga", "hack"]
+        },
+        "driveLink": { "type": "string" },
+        "isNewRelease": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "title", "type"]
+    },
+    "admin": {
+      "title": "Admin",
+      "description": "Represents an administrator user.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" }
+      },
+      "required": ["uid", "email"]
+    }
+  },
+  "firestore": {
+    "/movies/{movieId}": {
+      "schema": "movie",
+      "description": "Collection of movies."
+    },
+    "/admins/{adminUid}": {
+      "schema": "admin",
+      "description": "Whitelist of admin users."
+    }
+  }
+}

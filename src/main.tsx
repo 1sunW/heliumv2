@@ -2,6 +2,7 @@ import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
+import { FirebaseProvider } from './components/FirebaseProvider';
 
 // Unregister any existing service workers to fix 404 issues
 if ('serviceWorker' in navigator) {
@@ -14,6 +15,8 @@ if ('serviceWorker' in navigator) {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <FirebaseProvider>
+      <App />
+    </FirebaseProvider>
   </StrictMode>,
 );

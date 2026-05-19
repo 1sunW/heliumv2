@@ -1,0 +1,95 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isEmailVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        request.auth.token.email == "chaosclancontact1@gmail.com" ||
+        request.auth.token.email == "678.gxvin@gmail.com" ||
+        request.auth.token.email == "gavinrugg7@gmail.com"
+      );
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // --- Entity Validations ---
+
+    function isValidMovie(data) {
+      let required = ['id', 'title', 'type'];
+      let optional = ['description', 'year', 'rating', 'duration', 'genre', 'image', 'mood', 'driveLink', 'isNewRelease', 'createdAt'];
+      
+      return data.keys().hasAll(required) 
+        && data.id is string && data.id.size() <= 100
+        && data.title is string && data.title.size() <= 200
+        && data.type in ['movie', 'anime', 'tv', 'book', 'manga', 'hack']
+        && (!('description' in data) || (data.description is string && data.description.size() <= 2000))
+        && (!('year' in data) || (data.year is string && data.year.size() <= 10))
+        && (!('rating' in data) || (data.rating is string && data.rating.size() <= 10))
+        && (!('duration' in data) || (data.duration is string && data.duration.size() <= 50))
+        && (!('genre' in data) || (data.genre is list && data.genre.size() <= 10))
+        && (!('image' in data) || (data.image is string && data.image.size() <= 1000))
+        && (!('mood' in data) || (data.mood is string && data.mood.size() <= 100))
+        && (!('driveLink' in data) || (data.driveLink is string && data.driveLink.size() <= 1000))
+        && (!('isNewRelease' in data) || (data.isNewRelease is bool))
+        && (!('createdAt' in data) || (data.createdAt is timestamp));
+    }
+
+    // --- Collection Rules ---
+
+    // Movies Collection
+    match /movies/{movieId} {
+      allow read: if true; // Publicly readable
+      
+      allow create: if isAdmin() 
+        && isValidId(movieId) 
+        && isValidMovie(incoming())
+        && incoming().id == movieId;
+        
+      allow update: if isAdmin() 
+        && isValidMovie(incoming())
+        && (
+          // General admin update
+          incoming().id == existing().id
+        );
+        
+      allow delete: if isAdmin();
+    }
+
+    // Admins Collection (Whitelist)
+    match /admins/{adminUid} {
+      allow read: if isSignedIn() && (request.auth.uid == adminUid || isAdmin());
+      // Only existing admins can add new admins
+      allow write: if isAdmin();
+    }
+
+    // Users Collection
+    match /users/{userId} {
+      allow read: if isSignedIn() && request.auth.uid == userId;
+      allow write: if isSignedIn() && request.auth.uid == userId;
+    }
+  }
+}

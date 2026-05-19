@@ -13,6 +13,9 @@ export interface ContentItem {
   type?: 'movie' | 'anime' | 'tv' | 'book' | 'manga' | 'hack';
   driveLink?: string;
   links?: { part: string; url: string; }[];
+  isNewRelease?: boolean;
+  createdAt?: any;
+  updatedAt?: any;
 }
 
 export interface Partner {
@@ -569,6 +572,7 @@ export const MOVIES: ContentItem[] = [
         mood: "Dramatic",
         type: "movie",
         driveLink: "https://drive.google.com/file/d/1OqJ14L50E0wHdYrTq6M5cEFoUjGl6ENB/view?usp=drive_link",
+        isNewRelease: true
     },
     {
         id: "m1",
@@ -582,6 +586,7 @@ export const MOVIES: ContentItem[] = [
         mood: "Exciting",
         type: "movie",
         driveLink: "https://drive.google.com/file/d/1B_eiKUt7N5OxyUN9c37LG0pxcErP4yJ6/view",
+        isNewRelease: true
     },
     {
         id: "m2",

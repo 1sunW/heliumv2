@@ -40,12 +40,23 @@ import {
   Film,
   Terminal,
   Plus,
-  NotebookText
+  PlusCircle,
+  NotebookText,
+  LogOut,
+  LogIn,
+  Upload,
+  Calendar,
+  AlertCircle
 } from 'lucide-react';
 import GamesEmbed from './components/GamesEmbed';
 import airChatHtml from './components/AirChat.html?raw';
 import hydrogenChatHtml from './components/HydrogenChat.html?raw';
 import eaglercraftHtml from './components/Eaglercraft.html?raw';
+import { useAuth } from './components/FirebaseProvider';
+import { loginWithGoogle, logout, auth, db, isAdminUser, addMediaToFirestore, getAllMediaFromFirestore, getUserProfile, updateUserProfile } from './lib/firebase';
+import { collection, getDocs, doc, onSnapshot } from 'firebase/firestore';
+import { movieService } from './services/movieService';
+import { onAuthStateChanged } from 'firebase/auth';
 
 type CategoryType = 'Home' | 'Movies' | 'Games' | 'Anime' | 'Proxies' | 'Music' | 'TV Shows' | 'Books' | 'Hacks' | 'Extra';
 
@@ -68,22 +79,142 @@ export default function App() {
   const [isChangelogOpen, setIsChangelogOpen] = useState(false);
   const [isTopBarHidden, setIsTopBarHidden] = useState(false);
   const [isNotepadOpen, setIsNotepadOpen] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+
+  // Firebase Auth & Admin State from Provider
+  const { user, isAdmin, loading: authLoading } = useAuth();
   const [isAdminViewOpen, setIsAdminViewOpen] = useState(false);
+  const [adminTab, setAdminTab] = useState<'content' | 'admins'>('content');
+  const [adminEmails, setAdminEmails] = useState<{uid: string, email: string}[]>([]);
+  const [newAdminEmail, setNewAdminEmail] = useState('');
+  const [isAddingAdmin, setIsAddingAdmin] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [password, setPassword] = useState('');
   const [systemStatusClickCount, setSystemStatusClickCount] = useState(0);
 
-  // Added timer for notepad functionality
-  const [notepadTime, setNotepadTime] = useState(new Date());
+  // Firestore Media State
+  const [firestoreMedia, setFirestoreMedia] = useState<ContentItem[]>([]);
+  const [isFetchingMovies, setIsFetchingMovies] = useState(false);
+
+  // New Media Form State
+  const [newMediaData, setNewMediaData] = useState<Partial<ContentItem>>({
+    title: '',
+    description: '',
+    year: '',
+    rating: '',
+    duration: '',
+    genre: [],
+    image: '',
+    mood: '',
+    type: 'movie',
+    driveLink: '',
+    isNewRelease: false
+  });
+  const [isAddingMedia, setIsAddingMedia] = useState(false);
 
   useEffect(() => {
-    const timer = setInterval(() => setNotepadTime(new Date()), 1000);
-    return () => clearInterval(timer);
+    const fetchExternal = async () => {
+        setIsFetchingMovies(true);
+        try {
+            const movies = await movieService.getExternalMovies();
+            setFirestoreMedia(movies);
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setIsFetchingMovies(false);
+        }
+    };
+    fetchExternal();
   }, []);
 
+  const handleFirebaseLogin = async () => {
+    try {
+      const u = await loginWithGoogle();
+      const admin = await isAdminUser(u);
+      if (admin) {
+        setIsAdminViewOpen(true);
+      } else {
+        alert("Success! Your items will now sync across devices.");
+        setIsPasswordModalOpen(false);
+      }
+    } catch (err: any) {
+      if (err?.code === 'auth/popup-closed-by-user') {
+        console.log("Auth popup closed by user.");
+      } else {
+        console.error("Login failed:", err);
+        alert("Login failed: " + (err?.message || "Unknown error"));
+      }
+    }
+  };
 
-  // Settings & Customization state
+  useEffect(() => {
+    if (isAdminViewOpen) {
+        // Fetch admins if on that tab
+        const fetchAdmins = async () => {
+            const querySnapshot = await getDocs(collection(db, 'admins'));
+            setAdminEmails(querySnapshot.docs.map(doc => doc.data() as any));
+        };
+        fetchAdmins();
+    }
+  }, [isAdminViewOpen]);
+
+  const handleAddMedia = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMediaData.title || !newMediaData.type) {
+      alert("Title and Type are required.");
+      return;
+    }
+
+    setIsAddingMedia(true);
+    try {
+      const id = await addMediaToFirestore(newMediaData);
+      const media = await getAllMediaFromFirestore();
+      setFirestoreMedia(media as ContentItem[]);
+      setIsAdminViewOpen(false);
+      setNewMediaData({
+        title: '',
+        description: '',
+        year: '',
+        rating: '',
+        duration: '',
+        genre: [],
+        image: '',
+        mood: '',
+        type: 'movie',
+        driveLink: '',
+        isNewRelease: false
+      });
+      alert(`Added media with ID: ${id}`);
+    } catch (err) {
+      console.error("Failed to add media:", err);
+      alert("Failed to add media. Check console.");
+    } finally {
+      setIsAddingMedia(false);
+    }
+  };
+
+  useEffect(() => {
+    let unsubscribe: (() => void) | undefined;
+
+    if (user) {
+      const userRef = doc(db, 'users', user.uid);
+      unsubscribe = onSnapshot(userRef, (docSnap) => {
+        if (docSnap.exists()) {
+          const profile = docSnap.data();
+          if (profile.watchlist) setLibraryIds(profile.watchlist);
+          if (profile.library) setWatchedIds(profile.library);
+        }
+      }, (error) => {
+        console.error("Error listening to user profile:", error);
+      });
+    } else {
+      setLibraryIds([]);
+      setWatchedIds([]);
+    }
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, [user]);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isSettingsFullscreen, setIsSettingsFullscreen] = useState(false);
   const [settingsFullscreenClickCount, setSettingsFullscreenClickCount] = useState(0);
@@ -324,18 +455,36 @@ export default function App() {
     console.log(`Opening ${movie.title} link...`);
   };
 
-  const toggleLibrary = (id: string, e?: React.MouseEvent) => {
+  const toggleLibrary = async (id: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    setLibraryIds(prev => 
-      prev.includes(id) ? prev.filter(libId => libId !== id) : [...prev, id]
-    );
+    const newIds = libraryIds.includes(id) 
+      ? libraryIds.filter(libId => libId !== id) 
+      : [...libraryIds, id];
+    
+    setLibraryIds(newIds);
+    if (user) {
+      try {
+        await updateUserProfile(user.uid, { watchlist: newIds });
+      } catch (err) {
+        console.error("Failed to sync watchlist:", err);
+      }
+    }
   };
 
-  const toggleWatched = (id: string, e?: React.MouseEvent) => {
+  const toggleWatched = async (id: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    setWatchedIds(prev => 
-      prev.includes(id) ? prev.filter(wId => wId !== id) : [...prev, id]
-    );
+    const newIds = watchedIds.includes(id) 
+      ? watchedIds.filter(wId => wId !== id) 
+      : [...watchedIds, id];
+      
+    setWatchedIds(newIds);
+    if (user) {
+      try {
+        await updateUserProfile(user.uid, { library: newIds });
+      } catch (err) {
+        console.error("Failed to sync library:", err);
+      }
+    }
   };
 
   const normalizedAnime = ANIME_DATA.map(item => ({
@@ -348,12 +497,27 @@ export default function App() {
     genre: item.genre || [],
     image: item.image || (item as any).imageUrl || '',
     mood: item.mood,
-    type: 'anime',
+    type: 'anime' as const,
     driveLink: item.driveLink || (item as any).link || '',
     links: item.links
   }));
 
-  const allItems = [...MOVIES, ...normalizedAnime, ...TV_SHOWS, ...BOOKS, ...MANGA, ...WINDOWS_APPS, ...GIMKIT_HACKS];
+  const allItems = useMemo(() => {
+    return [
+      ...MOVIES, 
+      ...normalizedAnime, 
+      ...TV_SHOWS, 
+      ...BOOKS, 
+      ...MANGA, 
+      ...WINDOWS_APPS, 
+      ...GIMKIT_HACKS,
+      ...firestoreMedia
+    ];
+  }, [firestoreMedia]);
+
+  const newReleases = useMemo(() => {
+    return allItems.filter(item => item.isNewRelease);
+  }, [allItems]);
 
   const displayedItems = activeView === 'watchlist' 
     ? allItems.filter(m => libraryIds.includes(m.id))
@@ -378,6 +542,18 @@ export default function App() {
   );
 
   const categories: CategoryType[] = ['Home', 'Movies', 'Games', 'Anime', 'TV Shows', 'Proxies', 'Music', 'Books', 'Hacks', 'Extra'];
+
+  const renderSectionHeader = (title: string, icon: React.ReactNode) => (
+    <div className="flex items-center justify-between mb-8 px-2">
+      <div className="flex items-center gap-4">
+        <div className="p-2 bg-imm-accent/10 rounded-xl">
+          {icon}
+        </div>
+        <h2 className="serif text-3xl font-bold italic tracking-tight text-white">{title}</h2>
+      </div>
+      <div className="h-px flex-1 mx-8 bg-gradient-to-r from-imm-border to-transparent opacity-50"></div>
+    </div>
+  );
 
   const ANIME_REQUIRED_GROUPS = [
     { name: "Group 1", url: "https://www.google.com/url?q=https%3A%2F%2Ftinyurl.com%2F9yh733xs&sa=D&sntz=1&usg=AOvVaw2_LO0xJ384oc9NVIw5zKBc" },
@@ -458,7 +634,8 @@ export default function App() {
   );
 
   return (
-    <div className="flex flex-col h-screen w-screen border-imm-border border-8 box-border overflow-hidden selection:bg-imm-accent/30 bg-imm-bg">
+    <div className="flex flex-col h-screen w-screen border-imm-border border-8 box-border overflow-hidden selection:bg-imm-accent/30 bg-imm-bg relative">
+      <div className="atmosphere" />
       {/* Top Category Bar */}
       {!isTopBarHidden && (
       <div className={`bg-imm-sidebar border-b border-imm-border shrink-0 flex items-center px-6 overflow-x-auto no-scrollbar py-3 gap-8 z-50 transition-opacity duration-300 ${selectedMovie || activeMethod || activeExtra ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
@@ -668,13 +845,37 @@ export default function App() {
                 <>
                   <div className="w-px h-4 bg-imm-border"></div>
                   <button
-                    onClick={() => setIsNotepadOpen(!isNotepadOpen)}
+                    onClick={() => setIsAdminViewOpen(true)}
                     className="flex items-center justify-center w-6 h-6 hover:text-imm-accent transition-colors"
-                    title="Toggle Notepad"
+                    title="Admin Dashboard"
                   >
-                    <NotebookText className="w-4 h-4" />
+                    <PlusCircle className="w-4 h-4" />
+                  </button>
+                  <div className="w-px h-4 bg-imm-border"></div>
+                  <button
+                    onClick={() => logout()}
+                    className="flex items-center justify-center w-6 h-6 hover:text-red-500 transition-colors"
+                    title="Logout"
+                  >
+                    <LogOut className="w-4 h-4" />
                   </button>
                 </>
+              )}
+              {(!isAdmin && !authLoading) && (
+                <button
+                    onClick={() => {
+                        if (user) {
+                            // Already logged in but maybe not admin
+                            alert("You are synced! Your watchlist is saved to the cloud.");
+                        } else {
+                            handleFirebaseLogin().catch(() => setIsPasswordModalOpen(true));
+                        }
+                    }}
+                    className={`flex items-center justify-center w-6 h-6 transition-colors ${user ? 'text-green-400' : 'hover:text-imm-accent'}`}
+                    title={user ? "Cloud Sync Active" : "Sign in to Sync"}
+                  >
+                    {user ? <Globe className="w-4 h-4" /> : <Shield className="w-4 h-4" />}
+                  </button>
               )}
             </div>
             
@@ -780,31 +981,32 @@ export default function App() {
                   onClick={e => e.stopPropagation()}
                   className="bg-black border border-imm-accent/50 rounded-3xl p-8 max-w-sm w-full shadow-2xl relative"
                 >
-                  <h2 className="text-xl font-bold mb-6 text-white">Enter Password</h2>
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-imm-sidebar border border-imm-border rounded-xl px-4 py-3 text-white mb-6 focus:outline-none focus:border-imm-accent"
-                    placeholder="Enter password..."
-                  />
-                  <div className="flex justify-end gap-4">
-                    <button onClick={() => setIsPasswordModalOpen(false)} className="px-4 py-2 text-imm-text/60 hover:text-white transition-colors">Cancel</button>
+                  <h2 className="text-xl font-bold mb-6 text-white text-center">Cloud Sync & Access</h2>
+                  <div className="space-y-4">
+                    <p className="text-sm text-imm-text/60 text-center mb-6">
+                      Sign in with Google to sync your watchlist and library across all your devices.
+                    </p>
                     <button 
-                      onClick={() => {
-                        if (password === 'helium') {
-                          setIsAdmin(true);                
-                          setIsAdminViewOpen(true);
-                          setIsPasswordModalOpen(false);
-                          setPassword('');
-                        } else {
-                          alert('Incorrect password!');
-                          setPassword('');
-                        }
-                      }}
-                      className="px-6 py-2 bg-imm-accent text-black rounded-lg font-bold hover:bg-imm-accent-hover transition-colors"
+                      onClick={handleFirebaseLogin}
+                      className="w-full bg-white text-black py-4 rounded-xl font-bold hover:bg-white/90 transition-all flex items-center justify-center gap-3"
                     >
-                      Login
+                      <LogIn className="w-5 h-5" />
+                      {user ? 'Switch Account' : 'Sign in with Google'}
+                    </button>
+                    {isAdmin && (
+                      <button 
+                        onClick={() => logout()}
+                        className="w-full bg-red-500/10 text-red-500 py-3 rounded-xl font-semibold hover:bg-red-500/20 transition-all flex items-center justify-center gap-3 border border-red-500/20"
+                      >
+                        <LogOut className="w-5 h-5" />
+                        Sign Out
+                      </button>
+                    )}
+                    <button 
+                      onClick={() => setIsPasswordModalOpen(false)} 
+                      className="w-full py-3 text-imm-text/40 hover:text-white transition-colors text-xs uppercase tracking-widest font-bold"
+                    >
+                      Close
                     </button>
                   </div>
                 </motion.div>
@@ -834,18 +1036,146 @@ export default function App() {
                   >
                     <X className="w-5 h-5" />
                   </button>
-                  <h2 className="serif text-3xl mb-8 text-green-500 flex items-center gap-3 italic">
-                     Admin Dashboard
-                  </h2>
-                  <div className="text-green-500 font-mono text-sm space-y-4">
-                     <p>System Status: Nominal</p>
-                     <p>User Count: [OMITTED]</p>
-                     <p>Total Visits: [OMITTED]</p>
-                     <p>Last Update: {new Date().toLocaleDateString()}</p>
-                     <div className="mt-8 border-t border-green-500/20 pt-4">
-                        <p className="text-white/60 italic font-light">Root access authorized.</p>
-                     </div>
+                  <div className="flex gap-4 mb-6 border-b border-white/5">
+                    <button 
+                        onClick={() => setAdminTab('content')}
+                        className={`pb-2 text-xs uppercase tracking-widest font-bold transition-colors ${adminTab === 'content' ? 'text-imm-accent border-b-2 border-imm-accent' : 'text-imm-text/40 hover:text-white'}`}
+                    >
+                        Content
+                    </button>
+                    <button 
+                        onClick={() => setAdminTab('admins')}
+                        className={`pb-2 text-xs uppercase tracking-widest font-bold transition-colors ${adminTab === 'admins' ? 'text-imm-accent border-b-2 border-imm-accent' : 'text-imm-text/40 hover:text-white'}`}
+                    >
+                        Admins
+                    </button>
                   </div>
+
+                  {adminTab === 'content' ? (
+                  <form onSubmit={handleAddMedia} className="space-y-6 max-h-[60vh] overflow-y-auto px-2 custom-scrollbar">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-[10px] uppercase tracking-widest text-imm-text/60 font-bold">Title</label>
+                        <input 
+                          type="text" 
+                          required
+                          value={newMediaData.title}
+                          onChange={e => setNewMediaData({...newMediaData, title: e.target.value})}
+                          className="w-full bg-imm-sidebar border border-imm-border rounded-xl px-4 py-3 text-white focus:border-imm-accent outline-none"
+                          placeholder="Movie Title..."
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] uppercase tracking-widest text-imm-text/60 font-bold">Type</label>
+                        <select 
+                          value={newMediaData.type}
+                          onChange={e => setNewMediaData({...newMediaData, type: e.target.value as any})}
+                          className="w-full bg-imm-sidebar border border-imm-border rounded-xl px-4 py-3 text-white focus:border-imm-accent outline-none"
+                        >
+                          <option value="movie">Movie</option>
+                          <option value="anime">Anime</option>
+                          <option value="tv">TV Show</option>
+                          <option value="book">Book</option>
+                          <option value="manga">Manga</option>
+                          <option value="hack">Hack</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] uppercase tracking-widest text-imm-text/60 font-bold">Year</label>
+                        <input 
+                          type="text" 
+                          value={newMediaData.year}
+                          onChange={e => setNewMediaData({...newMediaData, year: e.target.value})}
+                          className="w-full bg-imm-sidebar border border-imm-border rounded-xl px-4 py-3 text-white focus:border-imm-accent outline-none"
+                          placeholder="2025"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] uppercase tracking-widest text-imm-text/60 font-bold">Rating</label>
+                        <input 
+                          type="text" 
+                          value={newMediaData.rating}
+                          onChange={e => setNewMediaData({...newMediaData, rating: e.target.value})}
+                          className="w-full bg-imm-sidebar border border-imm-border rounded-xl px-4 py-3 text-white focus:border-imm-accent outline-none"
+                          placeholder="8.5"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-[10px] uppercase tracking-widest text-imm-text/60 font-bold">Description</label>
+                      <textarea 
+                        value={newMediaData.description}
+                        onChange={e => setNewMediaData({...newMediaData, description: e.target.value})}
+                        className="w-full bg-imm-sidebar border border-imm-border rounded-xl px-4 py-3 text-white focus:border-imm-accent outline-none h-24 resize-none"
+                        placeholder="Content description..."
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-[10px] uppercase tracking-widest text-imm-text/60 font-bold">Drive Link</label>
+                      <input 
+                        type="url" 
+                        value={newMediaData.driveLink}
+                        onChange={e => setNewMediaData({...newMediaData, driveLink: e.target.value})}
+                        className="w-full bg-imm-sidebar border border-imm-border rounded-xl px-4 py-3 text-white focus:border-imm-accent outline-none"
+                        placeholder="https://drive.google.com/..."
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-[10px] uppercase tracking-widest text-imm-text/60 font-bold">Image URL</label>
+                      <input 
+                        type="url" 
+                        value={newMediaData.image}
+                        onChange={e => setNewMediaData({...newMediaData, image: e.target.value})}
+                        className="w-full bg-imm-sidebar border border-imm-border rounded-xl px-4 py-3 text-white focus:border-imm-accent outline-none"
+                        placeholder="https://..."
+                      />
+                    </div>
+
+                    <div className="flex items-center gap-4 py-4 border-t border-white/5">
+                      <label className="flex items-center gap-3 cursor-pointer group">
+                        <div className={`w-10 h-6 rounded-full p-1 transition-colors ${newMediaData.isNewRelease ? 'bg-imm-accent' : 'bg-imm-sidebar border border-imm-border'}`}>
+                           <div className={`w-4 h-4 bg-white rounded-full transition-transform ${newMediaData.isNewRelease ? 'translate-x-4' : 'translate-x-0'}`} />
+                        </div>
+                        <input 
+                          type="checkbox" 
+                          hidden
+                          checked={newMediaData.isNewRelease}
+                          onChange={e => setNewMediaData({...newMediaData, isNewRelease: e.target.checked})}
+                        />
+                        <span className="text-xs font-bold uppercase tracking-widest text-imm-text/60 group-hover:text-white transition-colors">Mark as New Release</span>
+                      </label>
+                    </div>
+
+                    <button 
+                      type="submit"
+                      disabled={isAddingMedia}
+                      className="w-full py-4 bg-imm-accent text-black rounded-xl font-bold hover:brightness-110 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                    >
+                      {isAddingMedia ? <Activity className="w-5 h-5 animate-spin" /> : <Upload className="w-5 h-5" />}
+                      {isAddingMedia ? 'Uploading...' : 'Publish Content'}
+                    </button>
+                  </form>
+                  ) : (
+                    <div className="space-y-6 max-h-[60vh] overflow-y-auto px-2 custom-scrollbar">
+                         <div className="space-y-4">
+                            <h3 className="text-xs font-bold uppercase tracking-widest text-imm-text/60">Current Admins</h3>
+                            <div className="space-y-2">
+                                {adminEmails.map((admin, idx) => (
+                                    <div key={idx} className="flex justify-between items-center bg-imm-sidebar p-3 rounded-xl border border-imm-border">
+                                        <span className="text-sm text-white">{admin.email}</span>
+                                        <span className="text-[10px] text-imm-text/40 font-mono">{admin.uid}</span>
+                                    </div>
+                                ))}
+                            </div>
+                         </div>
+                         <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-xl text-[10px] text-yellow-500/80 leading-relaxed">
+                            To add new admins, you currently need to modify the <code>firestore.rules</code> or the <code>src/lib/firebase.ts</code> file directly to include their email address in the whitelist. The database will automatically register your account as admin if you login with <code>chaosclancontact1@gmail.com</code>.
+                         </div>
+                    </div>
+                  )}
                 </motion.div>
               </motion.div>
             )}
@@ -1133,6 +1463,35 @@ export default function App() {
 
             {(activeCategory === 'Movies' || activeCategory === 'Anime' || activeCategory === 'TV Shows' || (activeCategory === 'Books' && activeView !== 'discovery')) && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-10">
+                {/* New Releases Section (Only for Movies discovery) */}
+                {activeCategory === 'Movies' && activeView === 'discovery' && (
+                  <section>
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="bg-imm-accent/10 p-2 rounded-lg">
+                        <Sparkles className="w-5 h-5 text-imm-accent" />
+                      </div>
+                      <div>
+                        <h2 className="serif text-2xl font-bold text-white">New Releases</h2>
+                        <p className="text-[10px] uppercase tracking-widest text-imm-text/40">Freshly added to the collection</p>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+                      {isFetchingMovies ? (
+                        Array.from({length: 4}).map((_, i) => (
+                           <div key={i} className="aspect-[2/3] bg-white/5 animate-pulse rounded-2xl" />
+                        ))
+                      ) : allItems.filter(m => (m as any).isNewRelease).length > 0 ? (
+                        allItems.filter(m => (m as any).isNewRelease).map((item, index) => renderMovieCard(item, index))
+                      ) : (
+                        <div className="col-span-full py-10 text-center border border-dashed border-white/10 rounded-2xl opacity-40">
+                             <p className="text-sm italic font-serif">No new releases currently spotlighted...</p>
+                        </div>
+                      )}
+                    </div>
+                  </section>
+                )}
+
                 {/* Anime Required Groups */}
                 {activeCategory === 'Anime' && activeView === 'discovery' && (
                   <section>
@@ -1189,6 +1548,16 @@ export default function App() {
                 )}
 
                 {/* Featured Spotlight (Only if Discovery) */}
+            {activeView === 'discovery' && activeCategory === 'Home' && newReleases.length > 0 && (
+              <section className="mb-16 px-4 lg:px-10">
+                {renderSectionHeader("New Releases", <Sparkles className="w-6 h-6 text-imm-accent" />)}
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 lg:gap-8">
+                  {newReleases.map((item, idx) => renderMovieCard(item, idx))}
+                </div>
+              </section>
+            )}
+
+            {/* Featured Spotlight (Only if Discovery) */}
                 {activeView === 'discovery' && activeCategory === 'Movies' && (
                   <section className="relative h-72 shrink-0 rounded-3xl overflow-hidden border border-white/5 glow-amber">
                     <div className="absolute inset-0 bg-gradient-to-r from-imm-sidebar via-imm-sidebar/80 to-transparent z-10"></div>

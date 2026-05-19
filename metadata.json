@@ -2,5 +2,5 @@
   "name": "Helium",
   "description": "A refined, immersive hub for cinema, discovery, and digital atmosphere.",
   "requestFramePermissions": [],
-  "majorCapabilities": []
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
