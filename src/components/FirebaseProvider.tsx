@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { auth, db } from '../lib/firebase';
+import { auth, db, isAdminUser } from '../lib/firebase';
 
 interface AuthContextType {
     user: User | null;
@@ -22,17 +22,22 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             setUser(user);
             if (user) {
-                // Check if user is admin in Firestore
-                const adminDoc = await getDoc(doc(db, 'admins', user.uid));
-                setIsAdmin(adminDoc.exists());
+                // Check if user is admin
+                const isUserAdmin = await isAdminUser(user);
+                setIsAdmin(isUserAdmin);
 
-                // Optional: Bootstrap the first admin if the collection is empty? 
-                // But usually we don't do that automatically for security.
-                // For this app, I'll add a check: if the user matches the creator's email, make them admin.
-                if (user.email === 'chaosclancontact1@gmail.com' && !adminDoc.exists()) {
+                // For this app, bootstrap specific emails into the admins collection if they login
+                const adminEmails = [
+                    'chaosclancontact1@gmail.com',
+                    '678.gxvin@gmail.com',
+                    'gavinrugg7@gmail.com'
+                ];
+
+                if (user.email && adminEmails.includes(user.email) && !isUserAdmin) {
                     await setDoc(doc(db, 'admins', user.uid), {
                         uid: user.uid,
-                        email: user.email
+                        email: user.email,
+                        addedAt: new Date()
                     });
                     setIsAdmin(true);
                 }

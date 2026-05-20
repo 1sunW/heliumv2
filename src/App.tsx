@@ -132,6 +132,7 @@ export default function App() {
       const admin = await isAdminUser(u);
       if (admin) {
         setIsAdminViewOpen(true);
+        setIsPasswordModalOpen(false);
       } else {
         alert("Success! Your items will now sync across devices.");
         setIsPasswordModalOpen(false);
@@ -864,12 +865,7 @@ export default function App() {
               {(!isAdmin && !authLoading) && (
                 <button
                     onClick={() => {
-                        if (user) {
-                            // Already logged in but maybe not admin
-                            alert("You are synced! Your watchlist is saved to the cloud.");
-                        } else {
-                            handleFirebaseLogin().catch(() => setIsPasswordModalOpen(true));
-                        }
+                        setIsPasswordModalOpen(true);
                     }}
                     className={`flex items-center justify-center w-6 h-6 transition-colors ${user ? 'text-green-400' : 'hover:text-imm-accent'}`}
                     title={user ? "Cloud Sync Active" : "Sign in to Sync"}
