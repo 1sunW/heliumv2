@@ -635,7 +635,7 @@ export default function App() {
   );
 
   return (
-    <div className="flex flex-col h-screen w-screen border-imm-border border-8 box-border overflow-hidden selection:bg-imm-accent/30 bg-imm-bg relative">
+    <div className="flex flex-col h-screen w-screen box-border overflow-hidden selection:bg-imm-accent/30 bg-imm-bg relative">
       <div className="atmosphere" />
       {/* Top Category Bar */}
       {!isTopBarHidden && (

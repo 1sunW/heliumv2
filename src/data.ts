@@ -6903,6 +6903,21 @@ export const TV_SHOWS: ContentItem[] = [
           { part: "Season 5", url: "https://drive.google.com/drive/folders/1lm_C-dAiAVANZlH66bZNnnUP8qWYo0zT?usp=share_link" }
         ],
     },
+    {
+        id: "tv-digital-circus",
+        title: "The Amazing Digital Circus",
+        description: "A woman gets trapped in a wacky virtual world along with five other humans.",
+        year: "2023",
+        rating: "8.5",
+        duration: "Season 1",
+        genre: ["Animation", "Comedy", "Dark Fantasy"],
+        image: "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcQ9EADPoL_6mV9wkpoHLbVooMGsWJ3QfgYNFJPE9sYYaRDbzbfA",
+        mood: "Wacky",
+        type: "tv",
+        links: [
+            { part: "Episode 9", url: "https://drive.google.com/file/d/1-xS9yU-joMUw9XacRg2x8zXDt3yt0Oha/view?usp=drive_link" }
+        ],
+    },
 ];
 
 export interface ProxyItem {
