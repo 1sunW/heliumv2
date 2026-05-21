@@ -535,7 +535,7 @@ export default function App() {
     : activeView === 'library'
       ? allItems.filter(m => watchedIds.includes(m.id))
       : activeCategory === 'Movies' 
-        ? allItems.filter(item => item.type === 'movie')
+        ? allItems.filter(item => item.type === 'movie' && !item.isNewRelease)
         : activeCategory === 'Anime' 
           ? allItems.filter(item => item.type === 'anime')
           : activeCategory === 'TV Shows'
@@ -942,6 +942,11 @@ export default function App() {
                   </h2>
                   <ul className="space-y-6">
                     {[
+                      { date: '05/20/2026', title: 'Added TADC Movie', details: 'Added The Amazing Digital Circus Movie.' },
+                      { date: '05/19/2026', title: 'Google Account Login', details: 'Implemented Google Account login with persistent bookmarks and library.' },
+                      { date: '05/18/2026', title: 'ESC Feature for Games', details: 'Added ESC key feature/interactivity for full-screen games.' },
+                      { date: '05/10/2026', title: 'Fixed Games Section', details: 'Resolved Games section loading and controls.' },
+                      { date: '04/30/2026', title: 'Static Compatibility', details: 'Added structural static compatibility across components.' },
                       { date: '04/27/2026', title: 'RELEASE OF V2', details: 'V2 IS OUT https://heliumv2.acelockedin.workers.dev' },
                       { date: '04/20/2026', title: 'v2.2', details: 'A-B Anime DONE. All games in one, credits to DominumNetwork and their team. 190k visits, can we hit 200k before May? Truly thank you guys.' },
                       { date: '04/16/2026', title: 'v2.1', details: "New music section incoming. 150k visits. I can't believe it, thank y'all. Working on anime. Been M.I.A for so long." },
@@ -1394,17 +1399,6 @@ export default function App() {
               <div className={`flex flex-col md:flex-row items-start md:items-center justify-between gap-4 w-full max-w-7xl mx-auto ${activeCategory === 'Games' ? 'px-6 mt-6' : ''}`}>
                  <div className="flex items-center gap-4">
                    <h2 className="serif text-3xl font-bold tracking-wide text-white capitalize">{activeCategory}</h2>
-                   {activeCategory === 'Movies' && (
-                     <select 
-                       value={activeView} 
-                       onChange={(e) => setActiveView(e.target.value as 'discovery' | 'watchlist' | 'library')}
-                       className="bg-imm-card border border-imm-border text-imm-text text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-lg focus:outline-none focus:border-imm-accent font-bold"
-                     >
-                       <option value="discovery">Discovery</option>
-                       <option value="watchlist">Watchlist</option>
-                       <option value="library">Library</option>
-                     </select>
-                   )}
                  </div>
                  <div className="relative group w-full md:w-72 lg:w-96">
                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 group-hover:text-imm-accent transition-colors" />
@@ -1444,11 +1438,8 @@ export default function App() {
                       <div className="flex items-center gap-4 text-sm">
                         <span className="bg-imm-accent/10 text-imm-accent px-3 py-1 rounded-full font-bold text-[10px] uppercase tracking-wider">Latest Update</span>
                         <div className="flex items-center gap-2 text-imm-text/60">
-                          <span className="font-bold">04/27/2026:</span>
-                          <span className="font-medium">RELEASE OF V2 IS OUT</span>
-                          <a href="https://heliumv2.acelockedin.workers.dev" target="_blank" rel="noreferrer" className="text-imm-accent hover:underline flex items-center gap-1 ml-2">
-                            heliumv2.acelockedin.workers.dev <ExternalLink className="w-3 h-3" />
-                          </a>
+                          <span className="font-bold">05/20/2026:</span>
+                          <span className="font-medium">Added The Amazing Digital Circus Movie</span>
                         </div>
                       </div>
                     </div>
@@ -1483,6 +1474,31 @@ export default function App() {
 
             {(activeCategory === 'Movies' || activeCategory === 'Anime' || activeCategory === 'TV Shows' || (activeCategory === 'Books' && activeView !== 'discovery')) && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-10">
+                {/* Featured Spotlight (Only if Discovery) */}
+                {activeView === 'discovery' && activeCategory === 'Movies' && (
+                  <section className="relative h-72 shrink-0 rounded-3xl overflow-hidden border border-white/5 glow-amber">
+                    <div className="absolute inset-0 bg-gradient-to-r from-imm-sidebar via-imm-sidebar/80 to-transparent z-10"></div>
+                    <div className="absolute inset-0">
+                      <img src={featuredMovie.image} alt={featuredMovie.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                    </div>
+                    <div className="relative z-20 h-full flex flex-col justify-center px-8 lg:px-12 max-w-xl">
+                      <div className="text-[10px] uppercase tracking-[0.3em] text-imm-accent mb-2 font-semibold flex items-center gap-2">
+                        <Sparkles className="w-3 h-3" /> Featured Spotlight
+                      </div>
+                      <h1 className="serif text-4xl lg:text-5xl font-bold mb-4 leading-tight text-white">{featuredMovie.title}</h1>
+                      <p className="text-sm text-imm-text/70 mb-6 line-clamp-2 leading-relaxed font-light italic">{featuredMovie.description}</p>
+                      <div className="flex items-center gap-4">
+                        <button 
+                          onClick={() => { handleWatch(featuredMovie); setSelectedMovie(featuredMovie); }}
+                          className="bg-imm-accent text-black px-8 py-3 rounded-full font-bold text-sm flex items-center gap-2 hover:bg-imm-accent-hover transition-colors"
+                        >
+                          <Play className="h-4 w-4 fill-current" /> Open in Google Drive
+                        </button>
+                      </div>
+                    </div>
+                  </section>
+                )}
+
                 {/* New Releases Section (Only for Movies discovery) */}
                 {activeCategory === 'Movies' && activeView === 'discovery' && (
                   <section>
@@ -1577,30 +1593,7 @@ export default function App() {
               </section>
             )}
 
-            {/* Featured Spotlight (Only if Discovery) */}
-                {activeView === 'discovery' && activeCategory === 'Movies' && (
-                  <section className="relative h-72 shrink-0 rounded-3xl overflow-hidden border border-white/5 glow-amber">
-                    <div className="absolute inset-0 bg-gradient-to-r from-imm-sidebar via-imm-sidebar/80 to-transparent z-10"></div>
-                    <div className="absolute inset-0">
-                      <img src={featuredMovie.image} alt={featuredMovie.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                    </div>
-                    <div className="relative z-20 h-full flex flex-col justify-center px-8 lg:px-12 max-w-xl">
-                      <div className="text-[10px] uppercase tracking-[0.3em] text-imm-accent mb-2 font-semibold flex items-center gap-2">
-                        <Sparkles className="w-3 h-3" /> Featured Spotlight
-                      </div>
-                      <h1 className="serif text-4xl lg:text-5xl font-bold mb-4 leading-tight text-white">{featuredMovie.title}</h1>
-                      <p className="text-sm text-imm-text/70 mb-6 line-clamp-2 leading-relaxed font-light italic">{featuredMovie.description}</p>
-                      <div className="flex items-center gap-4">
-                        <button 
-                          onClick={() => { handleWatch(featuredMovie); setSelectedMovie(featuredMovie); }}
-                          className="bg-imm-accent text-black px-8 py-3 rounded-full font-bold text-sm flex items-center gap-2 hover:bg-imm-accent-hover transition-colors"
-                        >
-                          <Play className="h-4 w-4 fill-current" /> Open in Google Drive
-                        </button>
-                      </div>
-                    </div>
-                  </section>
-                )}
+
 
                 {/* Watchlist Header */}
                 {activeView === 'watchlist' && (
@@ -1656,7 +1649,7 @@ export default function App() {
                   <section className="pb-10">
                     <div className="flex items-center justify-between mb-6">
                       <h2 className="serif text-2xl font-semibold">
-                        {activeView === 'watchlist' ? 'Saved Titles' : activeView === 'library' ? 'Completed Titles' : activeCategory === 'Anime' ? 'Trending Anime' : activeCategory === 'TV Shows' ? 'Episodic Journeys' : activeCategory === 'Books' ? 'Library' : activeCategory === 'Hacks' ? 'Hacker Resources' : 'Curated Cozy Classics'}
+                        {activeView === 'watchlist' ? 'Saved Titles' : activeView === 'library' ? 'Completed Titles' : activeCategory === 'Anime' ? 'Trending Anime' : activeCategory === 'TV Shows' ? 'Episodic Journeys' : activeCategory === 'Books' ? 'Library' : activeCategory === 'Hacks' ? 'Hacker Resources' : 'Cozy Films'}
                       </h2>
                     </div>
                     

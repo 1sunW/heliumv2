@@ -5708,6 +5708,20 @@ export const MOVIES: ContentItem[] = [
         type: "movie",
         driveLink: "https://drive.google.com/file/d/1_placeholder_red_one/view?usp=sharing",
     },
+    {
+        id: "m420",
+        title: "The Amazing Digital Circus Movie",
+        description: "A young woman becomes trapped in a whimsical yet terrifying virtual circus, where she must navigate eccentric toy-like companions and avoid glitching out entirely while searching for an exit.",
+        year: "2024",
+        rating: "8.9",
+        duration: "1h 22m",
+        genre: ["Animation", "Comedy", "Fantasy"],
+        image: "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcQ9EADPoL_6mV9wkpoHLbVooMGsWJ3QfgYNFJPE9sYYaRDbzbfA",
+        mood: "Wacky",
+        type: "movie",
+        driveLink: "https://drive.google.com/file/d/1L3z0yIbPpzYP0LoVhmze4_pm63VzzpsW/view",
+        isNewRelease: true
+    },
 ];
 
 export const TV_SHOWS: ContentItem[] = [
