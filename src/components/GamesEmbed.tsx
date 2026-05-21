@@ -947,27 +947,31 @@ function applyTheme(theme){
 }
 
 (function(){
-  const name = localStorage.getItem("dominum-theme") || "default";
+  try {
+    const name = localStorage.getItem("dominum-theme") || "default";
     if(name === "custom"){
-    let customStr = localStorage.getItem("dominum-custom-theme");
-    let custom = {};
-    if (customStr && typeof customStr === 'string') {
-      const trimmed = customStr.trim();
-      if (trimmed && trimmed !== "undefined" && trimmed !== "null" && trimmed !== "[object Object]" && (trimmed.startsWith('{') || trimmed.startsWith('['))) {
-        try {
-          const parsed = JSON.parse(trimmed);
-          if (parsed && typeof parsed === 'object') {
-            custom = parsed;
+      let customStr = localStorage.getItem("dominum-custom-theme");
+      let custom = {};
+      if (customStr && typeof customStr === 'string') {
+        const trimmed = customStr.trim();
+        if (trimmed && trimmed !== "undefined" && trimmed !== "null" && trimmed !== "[object Object]" && (trimmed.startsWith('{') || trimmed.startsWith('['))) {
+          try {
+            const parsed = JSON.parse(trimmed);
+            if (parsed && typeof parsed === 'object') {
+              custom = parsed;
+            }
+          } catch(innerError) {
+            console.warn("GamesEmbed: Inner JSON.parse failed:", innerError);
           }
-        } catch (e) {
-          console.warn("Failed to parse dominum-custom-theme:", e);
         }
       }
+      applyTheme(custom);
+    } else {
+      const targetTheme = themes[name] || themes.default;
+      if (targetTheme) applyTheme(targetTheme);
     }
-    applyTheme(custom);
-  } else {
-    const targetTheme = themes[name] || themes.default;
-    if (targetTheme) applyTheme(targetTheme);
+  } catch (e) {
+    console.warn("Theme loading or custom parsing failed:", e);
   }
 })();
 </script>

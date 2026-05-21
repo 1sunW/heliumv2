@@ -2,6 +2,33 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <script>
+      (function() {
+        const originalParse = JSON.parse;
+        JSON.parse = function(text, reviver) {
+          if (text === undefined || text === null || text === "undefined" || text === "null") {
+            return null;
+          }
+          if (typeof text === 'string') {
+            const trimmed = text.trim();
+            if (trimmed === 'undefined' || trimmed === 'null' || trimmed === '') {
+              return null;
+            }
+          }
+          try {
+            return originalParse(text, reviver);
+          } catch (e) {
+            if (typeof text === 'string') {
+              const trimmed = text.trim();
+              if (trimmed === 'undefined' || trimmed === 'null' || trimmed === '') {
+                return null;
+              }
+            }
+            throw e;
+          }
+        };
+      })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Helium</title>
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/1sunW/ICONS-FOR-LINKS/refs/heads/main/Helium-Logo.png" />

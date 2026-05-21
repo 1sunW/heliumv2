@@ -28,19 +28,23 @@ function applyTheme(theme) {
 }
 (function(){
   const ACTIVE_THEME_KEY = 'zgc_theme_v2_active';
-  let data = localStorage.getItem(ACTIVE_THEME_KEY);
-  if (data && typeof data === 'string') { 
-    const trimmed = data.trim();
-    if (trimmed && trimmed !== "undefined" && trimmed !== "null" && trimmed !== "[object Object]" && (trimmed.startsWith('{') || trimmed.startsWith('['))) {
-      try { 
-        const parsed = JSON.parse(trimmed);
-        if (parsed && typeof parsed === 'object') {
-          applyTheme(parsed); 
+  try {
+    let data = localStorage.getItem(ACTIVE_THEME_KEY);
+    if (data && typeof data === 'string') { 
+      const trimmed = data.trim();
+      if (trimmed && trimmed !== "undefined" && trimmed !== "null" && trimmed !== "[object Object]" && (trimmed.startsWith('{') || trimmed.startsWith('['))) {
+        try {
+          const parsed = JSON.parse(trimmed);
+          if (parsed && typeof parsed === 'object') {
+            applyTheme(parsed); 
+          }
+        } catch(innerError) {
+          console.warn("HydrogenChat: Inner JSON.parse failed:", innerError);
         }
-      } catch(e){
-        console.warn("Failed to parse zgc_theme:", e);
-      } 
+      }
     }
+  } catch(e) {
+    console.warn("Failed to parse zgc_theme:", e);
   }
 })();
 </script>
