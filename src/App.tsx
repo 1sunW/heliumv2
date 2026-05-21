@@ -90,6 +90,7 @@ export default function App() {
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [password, setPassword] = useState('');
   const [systemStatusClickCount, setSystemStatusClickCount] = useState(0);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   // Firestore Media State
   const [firestoreMedia, setFirestoreMedia] = useState<ContentItem[]>([]);
@@ -127,6 +128,8 @@ export default function App() {
   }, []);
 
   const handleFirebaseLogin = async () => {
+    if (isLoggingIn) return;
+    setIsLoggingIn(true);
     try {
       const u = await loginWithGoogle();
       const admin = await isAdminUser(u);
@@ -138,12 +141,19 @@ export default function App() {
         setIsPasswordModalOpen(false);
       }
     } catch (err: any) {
+      console.error("Firebase Login Error Details:", err);
       if (err?.code === 'auth/popup-closed-by-user') {
         console.log("Auth popup closed by user.");
+      } else if (err?.code === 'auth/cancelled-popup-request') {
+        console.log("Auth popup request was cancelled by subsequent request or browser event.");
+        alert("Sign-in cancelled. Please click the button once and wait for the login window to load. If the issue persists, try opening the application in a new tab using the button in the top right of the preview.");
+      } else if (err?.code === 'auth/popup-blocked') {
+        alert("The sign-in popup was blocked by your browser. Please allow popups for this site, or open the application in a new tab to sign in.");
       } else {
-        console.error("Login failed:", err);
-        alert("Login failed: " + (err?.message || "Unknown error"));
+        alert("Login failed: " + (err?.message || "Unknown error") + "\n\nTip: If you are having issues, try opening this application in a new tab using the icon in the top right of the preview to bypass iframe/popup restrictions.");
       }
+    } finally {
+      setIsLoggingIn(false);
     }
   };
 
@@ -984,10 +994,24 @@ export default function App() {
                     </p>
                     <button 
                       onClick={handleFirebaseLogin}
-                      className="w-full bg-white text-black py-4 rounded-xl font-bold hover:bg-white/90 transition-all flex items-center justify-center gap-3"
+                      disabled={isLoggingIn}
+                      className={`w-full py-4 rounded-xl font-bold flex items-center justify-center gap-3 transition-all ${
+                        isLoggingIn 
+                          ? 'bg-white/40 text-black/60 cursor-not-allowed' 
+                          : 'bg-white text-black hover:bg-white/90 cursor-pointer active:scale-[0.98]'
+                      }`}
                     >
-                      <LogIn className="w-5 h-5" />
-                      {user ? 'Switch Account' : 'Sign in with Google'}
+                      {isLoggingIn ? (
+                        <>
+                          <span className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></span>
+                          Signing in...
+                        </>
+                      ) : (
+                        <>
+                          <LogIn className="w-5 h-5" />
+                          {user ? 'Switch Account' : 'Sign in with Google'}
+                        </>
+                      )}
                     </button>
                     {isAdmin && (
                       <button 
