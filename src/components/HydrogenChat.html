@@ -30,11 +30,10 @@ function applyTheme(theme) {
   const ACTIVE_THEME_KEY = 'zgc_theme_v2_active';
   let data = localStorage.getItem(ACTIVE_THEME_KEY);
   if (data && typeof data === 'string') { 
-    data = data.trim();
-    // Improved check for non-JSON strings that localStorage.getItem might return
-    if (data !== "" && data !== "undefined" && data !== "null" && data !== "[object Object]") {
+    const trimmed = data.trim();
+    if (trimmed && trimmed !== "undefined" && trimmed !== "null" && trimmed !== "[object Object]" && (trimmed.startsWith('{') || trimmed.startsWith('['))) {
       try { 
-        const parsed = JSON.parse(data);
+        const parsed = JSON.parse(trimmed);
         if (parsed && typeof parsed === 'object') {
           applyTheme(parsed); 
         }
