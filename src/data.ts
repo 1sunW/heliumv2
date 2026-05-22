@@ -5726,6 +5726,19 @@ export const MOVIES: ContentItem[] = [
 
 export const TV_SHOWS: ContentItem[] = [
     {
+        id: "tv-stranger-things-85",
+        title: "Stranger Things: Tales from '85",
+        description: "A mysterious and exciting episodic journey tracing unheard stories from Hawkins in the summer of 1985.",
+        year: "2026",
+        rating: "9.2",
+        duration: "1 Season",
+        genre: ["Sci-Fi", "Drama", "Mystery"],
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRGcO-y-4y1_xoU_HOIe0oB4cxep59VIfOxAGrWWlyBpnJMH-kkJoBdI4iZbyHVv0mZC0eH&s=10",
+        mood: "Suspenseful",
+        type: "tv",
+        driveLink: "https://drive.google.com/drive/folders/1xFBd6U-Pj8dtN-tlM1C5eCu1l-xC8ZWb"
+    },
+    {
         id: "tv-helluva",
         title: "Helluva Boss",
         description: "Follow Blitzø, a self-appointed boss of an assassin agency, and his motley crew of demons as they try to keep their business afloat by taking on hits in the human world.",

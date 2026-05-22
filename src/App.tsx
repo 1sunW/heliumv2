@@ -211,8 +211,8 @@ export default function App() {
       unsubscribe = onSnapshot(userRef, (docSnap) => {
         if (docSnap.exists()) {
           const profile = docSnap.data();
-          if (profile.watchlist) setLibraryIds(profile.watchlist);
-          if (profile.library) setWatchedIds(profile.library);
+          if (profile && profile.watchlist && Array.isArray(profile.watchlist)) setLibraryIds(profile.watchlist);
+          if (profile && profile.library && Array.isArray(profile.library)) setWatchedIds(profile.library);
         }
       }, (error) => {
         console.error("Error listening to user profile:", error);
@@ -392,12 +392,32 @@ export default function App() {
     }
 
     const doc = win.document;
+    if (!doc) {
+      console.error("Could not load the tab document object.");
+      return;
+    }
+    
     doc.title = title;
+    
+    // Ensure both head and body exist in the blank document
+    const docEl = doc.documentElement;
+    if (docEl) {
+      if (!doc.head) {
+        const head = doc.createElement('head');
+        docEl.appendChild(head);
+      }
+      if (!doc.body) {
+        const body = doc.createElement('body');
+        docEl.appendChild(body);
+      }
+    }
     
     const link = doc.createElement('link');
     link.rel = 'icon';
     link.href = icon;
-    doc.head.appendChild(link);
+    if (doc.head) {
+      doc.head.appendChild(link);
+    }
 
     const iframe = doc.createElement('iframe');
     iframe.src = window.location.href;
@@ -407,10 +427,12 @@ export default function App() {
     iframe.style.margin = '0';
     iframe.style.padding = '0';
 
-    doc.body.style.margin = '0';
-    doc.body.style.padding = '0';
-    doc.body.style.overflow = 'hidden';
-    doc.body.appendChild(iframe);
+    if (doc.body) {
+      doc.body.style.margin = '0';
+      doc.body.style.padding = '0';
+      doc.body.style.overflow = 'hidden';
+      doc.body.appendChild(iframe);
+    }
 
     window.location.replace('https://google.com');
   };
@@ -546,11 +568,12 @@ export default function App() {
                 ? [...WINDOWS_APPS, ...GIMKIT_HACKS]
                 : [];
 
-  const filteredItems = displayedItems.filter(item => 
-    item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.genre.some(g => g.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const filteredItems = displayedItems.filter(item => {
+    const titleMatch = item.title ? item.title.toLowerCase().includes(searchQuery.toLowerCase()) : false;
+    const descMatch = item.description ? item.description.toLowerCase().includes(searchQuery.toLowerCase()) : false;
+    const genreMatch = item.genre && Array.isArray(item.genre) ? item.genre.some(g => g.toLowerCase().includes(searchQuery.toLowerCase())) : false;
+    return titleMatch || descMatch || genreMatch;
+  });
 
   const categories: CategoryType[] = ['Home', 'Movies', 'Games', 'Anime', 'TV Shows', 'Proxies', 'Music', 'Books', 'Hacks', 'Extra'];
 
@@ -942,6 +965,7 @@ export default function App() {
                   </h2>
                   <ul className="space-y-6">
                     {[
+                      { date: '05/22/2026', title: "Added Stranger Things: Tales from '85", details: "Added the Stranger Things: Tales from '85 TV show series." },
                       { date: '05/20/2026', title: 'Added TADC Movie', details: 'Added The Amazing Digital Circus Movie.' },
                       { date: '05/19/2026', title: 'Google Account Login', details: 'Implemented Google Account login with persistent bookmarks and library.' },
                       { date: '05/18/2026', title: 'ESC Feature for Games', details: 'Added ESC key feature/interactivity for full-screen games.' },
@@ -1438,8 +1462,8 @@ export default function App() {
                       <div className="flex items-center gap-4 text-sm">
                         <span className="bg-imm-accent/10 text-imm-accent px-3 py-1 rounded-full font-bold text-[10px] uppercase tracking-wider">Latest Update</span>
                         <div className="flex items-center gap-2 text-imm-text/60">
-                          <span className="font-bold">05/20/2026:</span>
-                          <span className="font-medium">Added The Amazing Digital Circus Movie</span>
+                          <span className="font-bold">05/22/2026:</span>
+                          <span className="font-medium">Added Stranger Things: Tales from '85</span>
                         </div>
                       </div>
                     </div>
