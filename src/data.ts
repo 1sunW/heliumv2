@@ -561,6 +561,20 @@ export const MANGA: ContentItem[] = [
 
 export const MOVIES: ContentItem[] = [
     {
+        id: "m-it-chapter-two",
+        title: "It: Chapter Two",
+        description: "Twenty-seven years after their first encounter with the terrifying Pennywise, the Losers Club have grown up and moved away, until a devastating phone call brings them back to Derry.",
+        year: "2019",
+        rating: "6.5",
+        duration: "2h 49m",
+        genre: ["Horror", "Fantasy", "Mystery"],
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTyNG7QR61t-wtAhqWCiHKIiYerYU8bhNReSMQT7qxeOg521q9am1QjGi6SDJ_E7fd9PgeISw&s=10",
+        mood: "Terrifying",
+        type: "movie",
+        driveLink: "https://drive.google.com/file/d/1vLFTFzlvu9TJXbcL40gnag9Xart3pKQI/view?usp=drive_link",
+        isNewRelease: true
+    },
+    {
         id: "m-whiplash",
         title: "Whiplash",
         description: "A promising young drummer enrolls at a cut-throat music conservatory where his dreams of greatness are mentored by an instructor who will stop at nothing to realize a student's potential.",
@@ -5726,6 +5740,19 @@ export const MOVIES: ContentItem[] = [
 
 export const TV_SHOWS: ContentItem[] = [
     {
+        id: "tv-aggretsuko",
+        title: "Aggretsuko",
+        description: "Frustrated with her thankless office job, Retsuko the red panda copes with her daily struggles by singing death metal at a local karaoke bar.",
+        year: "2018",
+        rating: "8.0",
+        duration: "5 Seasons",
+        genre: ["Animation", "Comedy", "Drama"],
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTSlLjc0cZem46mFlj5K-AlVxLGFXHwyVAbQTbGBWqFeT1vYtVrWJMcKz2mei5C-iJFXJaEWg&s=10",
+        mood: "Cathartic",
+        type: "tv",
+        driveLink: "https://drive.google.com/drive/folders/131z-Uec9n2IsXPws2rtIsvM7YqhSduTE"
+    },
+    {
         id: "tv-stranger-things-85",
         title: "Stranger Things: Tales from '85",
         description: "A mysterious and exciting episodic journey tracing unheard stories from Hawkins in the summer of 1985.",
@@ -6928,21 +6955,6 @@ export const TV_SHOWS: ContentItem[] = [
           { part: "Season 3", url: "https://drive.google.com/drive/folders/13z5iRAxkLTvO3XWNBIuguRPJS-4MPHjX?usp=share_link" },
           { part: "Season 4", url: "https://drive.google.com/drive/folders/1yUkaEirDrNUIURTEF-Yi0_VKAtyBftGZ?usp=share_link" },
           { part: "Season 5", url: "https://drive.google.com/drive/folders/1lm_C-dAiAVANZlH66bZNnnUP8qWYo0zT?usp=share_link" }
-        ],
-    },
-    {
-        id: "tv-digital-circus",
-        title: "The Amazing Digital Circus",
-        description: "A woman gets trapped in a wacky virtual world along with five other humans.",
-        year: "2023",
-        rating: "8.5",
-        duration: "Season 1",
-        genre: ["Animation", "Comedy", "Dark Fantasy"],
-        image: "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcQ9EADPoL_6mV9wkpoHLbVooMGsWJ3QfgYNFJPE9sYYaRDbzbfA",
-        mood: "Wacky",
-        type: "tv",
-        links: [
-            { part: "Episode 9", url: "https://drive.google.com/file/d/1-xS9yU-joMUw9XacRg2x8zXDt3yt0Oha/view?usp=drive_link" }
         ],
     },
 ];

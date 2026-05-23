@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MOVIES, ANIME_DATA, TV_SHOWS, PROXY_GROUPS, BOOKS, MANGA, WINDOWS_APPS, GIMKIT_HACKS, PARTNERS, type ContentItem, type ProxyGroup, type Partner } from './data';
 import { 
@@ -60,6 +60,21 @@ import { onAuthStateChanged } from 'firebase/auth';
 
 type CategoryType = 'Home' | 'Movies' | 'Games' | 'Anime' | 'Proxies' | 'Music' | 'TV Shows' | 'Books' | 'Hacks' | 'Extra';
 
+const normalizedAnime = ANIME_DATA.map(item => ({
+  id: item.id || '',
+  title: item.title || 'Unknown',
+  description: item.description,
+  year: item.year,
+  rating: item.rating,
+  duration: item.duration,
+  genre: item.genre || [],
+  image: item.image || (item as any).imageUrl || '',
+  mood: item.mood,
+  type: 'anime' as const,
+  driveLink: item.driveLink || (item as any).link || '',
+  links: item.links
+}));
+
 export default function App() {
   const [activeCategory, setActiveCategory] = useState<CategoryType>('Home');
   const [selectedMovie, setSelectedMovie] = useState<ContentItem | null>(null);
@@ -95,6 +110,24 @@ export default function App() {
   // Firestore Media State
   const [firestoreMedia, setFirestoreMedia] = useState<ContentItem[]>([]);
   const [isFetchingMovies, setIsFetchingMovies] = useState(false);
+
+  // IMDb Ratings Cache & State
+  const [imdbRatings, setImdbRatings] = useState<Record<string, string>>(() => {
+    try {
+      const cached = localStorage.getItem('helium_imdb_ratings_v1');
+      return cached ? JSON.parse(cached) : {};
+    } catch (e) {
+      return {};
+    }
+  });
+
+  const imdbRatingsRef = useRef(imdbRatings);
+  const fetchingRef = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    imdbRatingsRef.current = imdbRatings;
+  }, [imdbRatings]);
+
 
   // New Media Form State
   const [newMediaData, setNewMediaData] = useState<Partial<ContentItem>>({
@@ -399,25 +432,28 @@ export default function App() {
     
     doc.title = title;
     
-    // Ensure both head and body exist in the blank document
     const docEl = doc.documentElement;
-    if (docEl) {
-      if (!doc.head) {
-        const head = doc.createElement('head');
-        docEl.appendChild(head);
-      }
-      if (!doc.body) {
-        const body = doc.createElement('body');
-        docEl.appendChild(body);
-      }
+    if (!docEl) {
+      console.error("documentElement not found in custom tab cloaker.");
+      return;
+    }
+
+    let head = doc.head;
+    if (!head) {
+      head = doc.createElement('head');
+      docEl.appendChild(head);
+    }
+
+    let body = doc.body;
+    if (!body) {
+      body = doc.createElement('body');
+      docEl.appendChild(body);
     }
     
     const link = doc.createElement('link');
     link.rel = 'icon';
     link.href = icon;
-    if (doc.head) {
-      doc.head.appendChild(link);
-    }
+    head.appendChild(link);
 
     const iframe = doc.createElement('iframe');
     iframe.src = window.location.href;
@@ -427,12 +463,10 @@ export default function App() {
     iframe.style.margin = '0';
     iframe.style.padding = '0';
 
-    if (doc.body) {
-      doc.body.style.margin = '0';
-      doc.body.style.padding = '0';
-      doc.body.style.overflow = 'hidden';
-      doc.body.appendChild(iframe);
-    }
+    body.style.margin = '0';
+    body.style.padding = '0';
+    body.style.overflow = 'hidden';
+    body.appendChild(iframe);
 
     window.location.replace('https://google.com');
   };
@@ -520,21 +554,6 @@ export default function App() {
     }
   };
 
-  const normalizedAnime = ANIME_DATA.map(item => ({
-    id: item.id || '',
-    title: item.title || 'Unknown',
-    description: item.description,
-    year: item.year,
-    rating: item.rating,
-    duration: item.duration,
-    genre: item.genre || [],
-    image: item.image || (item as any).imageUrl || '',
-    mood: item.mood,
-    type: 'anime' as const,
-    driveLink: item.driveLink || (item as any).link || '',
-    links: item.links
-  }));
-
   const allItems = useMemo(() => {
     return [
       ...MOVIES, 
@@ -552,21 +571,32 @@ export default function App() {
     return allItems.filter(item => item.isNewRelease);
   }, [allItems]);
 
-  const displayedItems = activeView === 'watchlist' 
-    ? allItems.filter(m => libraryIds.includes(m.id))
-    : activeView === 'library'
-      ? allItems.filter(m => watchedIds.includes(m.id))
-      : activeCategory === 'Movies' 
-        ? allItems.filter(item => item.type === 'movie' && !item.isNewRelease)
-        : activeCategory === 'Anime' 
-          ? allItems.filter(item => item.type === 'anime')
-          : activeCategory === 'TV Shows'
-            ? allItems.filter(item => item.type === 'tv')
-            : activeCategory === 'Books'
-              ? [...BOOKS, ...MANGA]
-              : activeCategory === 'Hacks'
-                ? [...WINDOWS_APPS, ...GIMKIT_HACKS]
-                : [];
+  const displayedItems = useMemo(() => {
+    return activeView === 'watchlist' 
+      ? allItems.filter(m => libraryIds.includes(m.id))
+      : activeView === 'library'
+        ? allItems.filter(m => watchedIds.includes(m.id))
+        : activeCategory === 'Movies' 
+          ? allItems.filter(item => item.type === 'movie' && !item.isNewRelease)
+          : activeCategory === 'Anime' 
+            ? allItems.filter(item => item.type === 'anime')
+            : activeCategory === 'TV Shows'
+              ? allItems.filter(item => item.type === 'tv')
+              : activeCategory === 'Books'
+                ? [...BOOKS, ...MANGA]
+                : activeCategory === 'Hacks'
+                  ? [...WINDOWS_APPS, ...GIMKIT_HACKS]
+                  : [];
+  }, [activeView, activeCategory, allItems, libraryIds, watchedIds]);
+
+  const visibleIdsStr = useMemo(() => {
+    return [...displayedItems, ...newReleases]
+      .concat(selectedMovie ? [selectedMovie] : [])
+      .filter((item): item is ContentItem => !!item && (item.type === 'movie' || item.type === 'tv' || item.type === 'anime'))
+      .map(item => item.id)
+      .filter(Boolean)
+      .join(',');
+  }, [displayedItems, newReleases, selectedMovie]);
 
   const filteredItems = displayedItems.filter(item => {
     const titleMatch = item.title ? item.title.toLowerCase().includes(searchQuery.toLowerCase()) : false;
@@ -576,6 +606,94 @@ export default function App() {
   });
 
   const categories: CategoryType[] = ['Home', 'Movies', 'Games', 'Anime', 'TV Shows', 'Proxies', 'Music', 'Books', 'Hacks', 'Extra'];
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('helium_imdb_ratings_v1', JSON.stringify(imdbRatings));
+    } catch (e) {
+      console.error('LocalStorage write failed:', e);
+    }
+  }, [imdbRatings]);
+
+  useEffect(() => {
+    if (!visibleIdsStr) return;
+    const ids = visibleIdsStr.split(',');
+
+    // Filter items to fetch using stability refs
+    const itemsToFetch = allItems.filter((item): item is ContentItem => {
+      return !!item && 
+        ids.includes(item.id) && 
+        (item.type === 'movie' || item.type === 'tv' || item.type === 'anime') &&
+        !imdbRatingsRef.current[item.id] && 
+        !fetchingRef.current.has(item.id);
+    }).slice(0, 5);
+
+    if (itemsToFetch.length === 0) return;
+
+    // Mark as fetching immediately
+    itemsToFetch.forEach(item => fetchingRef.current.add(item.id));
+
+    itemsToFetch.forEach(async (item) => {
+      let cleanTitle = item.title;
+      // Normalizing title for lookups (remove common suffixes or extra info)
+      if (item.type === 'anime') {
+        cleanTitle = cleanTitle.replace(/\s*\(?(TV|Season\s*\d+|Uncensored|Batch)\)?/gi, '').trim();
+      }
+      
+      let omdbType = 'movie';
+      if (item.type === 'tv' || item.type === 'anime') {
+        omdbType = 'series';
+      }
+
+      const yearQuery = item.year && /^\d{4}$/.test(item.year) ? `&y=${item.year}` : '';
+      const apikeys = ['thewdb', '26f54c2a', 'Plp911'];
+      let ratingFetched = null;
+
+      for (const key of apikeys) {
+        try {
+          const url = `https://www.omdbapi.com/?t=${encodeURIComponent(cleanTitle)}&type=${omdbType}${yearQuery}&apikey=${key}`;
+          const res = await fetch(url);
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.Response === 'True' && data.imdbRating && data.imdbRating !== 'N/A') {
+              ratingFetched = data.imdbRating;
+              break;
+            }
+          }
+        } catch (e) {
+          console.warn(`OMDb primary fetch failed for ${cleanTitle} (Key: ${key})`, e);
+        }
+      }
+
+      // Try fallback without target year query
+      if (!ratingFetched && yearQuery) {
+        for (const key of apikeys) {
+          try {
+            const url = `https://www.omdbapi.com/?t=${encodeURIComponent(cleanTitle)}&apikey=${key}`;
+            const res = await fetch(url);
+            if (res.ok) {
+              const data = await res.json();
+              if (data && data.Response === 'True' && data.imdbRating && data.imdbRating !== 'N/A') {
+                ratingFetched = data.imdbRating;
+                break;
+              }
+            }
+          } catch (e) {
+            console.warn(`OMDb fallback fetch failed for ${cleanTitle} (Key: ${key})`, e);
+          }
+        }
+      }
+
+      // Set fetched rating, or preserve current rating on the item as a safe fallback
+      const finalRating = ratingFetched || item.rating || '8.0';
+
+      setImdbRatings(prev => ({
+        ...prev,
+        [item.id]: finalRating
+      }));
+    });
+  }, [visibleIdsStr, allItems]);
+
 
   const renderSectionHeader = (title: string, icon: React.ReactNode) => (
     <div className="flex items-center justify-between mb-8 px-2">
@@ -627,9 +745,9 @@ export default function App() {
         <div className={`absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent flex items-end justify-between p-4 transition-opacity ${libraryIds.includes(item.id) || watchedIds.includes(item.id) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
           <div className="flex flex-col gap-1 text-white">
             <div className="flex items-center gap-2 text-xs font-bold">
-              {item.rating && item.rating !== 'N/A' && (
+              {(imdbRatings[item.id] || item.rating) && (imdbRatings[item.id] || item.rating) !== 'N/A' && (
                 <>
-                  <Star className="w-3 h-3 text-imm-accent fill-current" /> {item.rating} Rating
+                  <Star className="w-3 h-3 text-imm-accent fill-current" /> {imdbRatings[item.id] || item.rating} IMDb
                 </>
               )}
             </div>
@@ -965,6 +1083,7 @@ export default function App() {
                   </h2>
                   <ul className="space-y-6">
                     {[
+                      { date: '05/23/2026', title: "Added Aggretsuko & It: Chapter Two", details: "Added Aggretsuko TV show and It: Chapter Two movie." },
                       { date: '05/22/2026', title: "Added Stranger Things: Tales from '85", details: "Added the Stranger Things: Tales from '85 TV show series." },
                       { date: '05/20/2026', title: 'Added TADC Movie', details: 'Added The Amazing Digital Circus Movie.' },
                       { date: '05/19/2026', title: 'Google Account Login', details: 'Implemented Google Account login with persistent bookmarks and library.' },
@@ -1462,8 +1581,8 @@ export default function App() {
                       <div className="flex items-center gap-4 text-sm">
                         <span className="bg-imm-accent/10 text-imm-accent px-3 py-1 rounded-full font-bold text-[10px] uppercase tracking-wider">Latest Update</span>
                         <div className="flex items-center gap-2 text-imm-text/60">
-                          <span className="font-bold">05/22/2026:</span>
-                          <span className="font-medium">Added Stranger Things: Tales from '85</span>
+                          <span className="font-bold">05/23/2026:</span>
+                          <span className="font-medium">Added Aggretsuko & It: Chapter Two</span>
                         </div>
                       </div>
                     </div>
@@ -1964,7 +2083,7 @@ export default function App() {
                                   <td className="py-4 px-4 font-medium">{hack.title}</td>
                                   <td className="py-4 px-4">
                                     <span className="px-2 py-1 rounded text-[10px] font-bold bg-imm-accent/10 text-imm-accent border border-imm-accent/20">
-                                      {hack.genre[0] || 'Hack'}
+                                      {(hack.genre && hack.genre[0]) || 'Hack'}
                                     </span>
                                   </td>
                                   <td className="py-4 px-4 text-right">
@@ -2236,10 +2355,12 @@ export default function App() {
               )}
               <div className={`w-full ${selectedMovie.type === 'hack' ? 'md:w-full' : 'md:w-1/2'} p-8 lg:p-12 overflow-y-auto`}>
                 <div className="flex items-center space-x-2 text-imm-accent mb-4">
-                  {selectedMovie.rating && selectedMovie.rating !== 'N/A' && (
+                  {(imdbRatings[selectedMovie.id] || selectedMovie.rating) && (imdbRatings[selectedMovie.id] || selectedMovie.rating) !== 'N/A' && (
                     <>
-                      <Star className="w-4 h-4 fill-current" />
-                      <span className="text-sm font-semibold tracking-wider">{selectedMovie.rating} Rating</span>
+                      <Star className="w-4 h-4 fill-current text-amber-500" />
+                      <span className="text-sm font-semibold tracking-wider text-amber-500 bg-amber-500/10 px-2.5 py-0.5 rounded-md border border-amber-500/20">
+                        {['movie', 'tv', 'anime'].includes(selectedMovie.type || '') ? 'IMDb ' : ''}{imdbRatings[selectedMovie.id] || selectedMovie.rating}
+                      </span>
                       <span className="text-imm-text/20">•</span>
                     </>
                   )}
