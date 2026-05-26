@@ -561,6 +561,62 @@ export const MANGA: ContentItem[] = [
 
 export const MOVIES: ContentItem[] = [
     {
+        id: "m-swapped",
+        title: "Swapped",
+        description: "Two people have their bodies switched under mysterious circumstances and must navigate each other's lives.",
+        year: "2020",
+        rating: "6.5",
+        duration: "1h 35m",
+        genre: ["Comedy", "Sci-Fi"],
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRltnK-rQZsujDIBS1dVmqsNjWygnjJBHFE8wOtyF7DOeUrkxjsSvOEoGM21nd_IPt8T4pEJQ&s=10",
+        mood: "Wacky",
+        type: "movie",
+        driveLink: "https://drive.google.com/file/d/1qn0JShcgJIVNFaJBwljbR1tsudAYHzct/view",
+        isNewRelease: true
+    },
+    {
+        id: "m-obsession",
+        title: "Obsession",
+        description: "A professional's life spirals out of control when an intense, forbidden attraction turns into a dangerous infatuation.",
+        year: "2023",
+        rating: "6.1",
+        duration: "1h 45m",
+        genre: ["Drama", "Thriller"],
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT-FF8iQ-Pj57hN-PrgJCGH0czzEwpCBdmcqeUDeMnTSv2QxkXVMe5b-1ekxfmIQnBQmv3N&s=10",
+        mood: "Intense",
+        type: "movie",
+        driveLink: "https://drive.google.com/file/d/1bQXOtjLq5VWPf7TGulIbH97MeS9bp40e/view?usp=drive_link",
+        isNewRelease: true
+    },
+    {
+        id: "m-mandalorian-grogu",
+        title: "Star Wars: The Mandalorian and Grogu",
+        description: "Din Djarin and Grogu set off on an epic big-screen space adventure across the Star Wars galaxy.",
+        year: "2026",
+        rating: "8.5",
+        duration: "2h 10m",
+        genre: ["Action", "Adventure", "Sci-Fi"],
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTSnpAd4a3Kpxgg3vxNFj-1tvXw3VRUMcsq5_LDxBpPec6Na-8h1YfkSuUW628AC76DgzMkIDK4hp_24jzhkPNj585xiHiHG62W2DWQh4o&s=10",
+        mood: "Epic",
+        type: "movie",
+        driveLink: "https://drive.google.com/file/d/1NR87GoLZVMCFPEKGgXWEJS7e5V_PbLkh/view?usp=drive_link",
+        isNewRelease: true
+    },
+    {
+        id: "m-the-devil-wears-prada-2",
+        title: "The Devil Wears Prada 2",
+        description: "Miranda Priestly and her former staff navigate a changed, digital media landscape in the highly anticipated sequel.",
+        year: "2026",
+        rating: "7.0",
+        duration: "1h 55m",
+        genre: ["Drama", "Comedy"],
+        image: "https://m.media-amazon.com/images/M/MV5BZmM3ZDU3ODItZmY5Yi00OTQ2LWE5OTctZTA5NDBhMWJkOGY3XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
+        mood: "Glamorous",
+        type: "movie",
+        driveLink: "https://drive.google.com/file/d/1s0OZcv14uSc6UKIOodQvI16e0jhDOdn6/view",
+        isNewRelease: true
+    },
+    {
         id: "m-it-chapter-two",
         title: "It: Chapter Two",
         description: "Twenty-seven years after their first encounter with the terrifying Pennywise, the Losers Club have grown up and moved away, until a devastating phone call brings them back to Derry.",
@@ -5740,6 +5796,20 @@ export const MOVIES: ContentItem[] = [
 
 export const TV_SHOWS: ContentItem[] = [
     {
+        id: "tv-the-boys",
+        title: "The Boys",
+        description: "A fun and irreverent take on what happens when superheroes—who are as popular as celebrities, as influential as politicians, and as revered as gods—abuse their superpowers.",
+        year: "2019",
+        rating: "8.7",
+        duration: "4 Seasons",
+        genre: ["Action", "Drama", "Sci-Fi"],
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQIBB5S0PwP_hi91ZedgGnEl124cKVlqANokURHXOAk4RQawn-xq_6XQjP4l5gKfdtzx9Bl&s=10",
+        mood: "Dark",
+        type: "tv",
+        driveLink: "https://drive.google.com/drive/folders/1DabZ3R9pCb-ZWup6ulB2tYFvSv9V83K9?usp=drive_link",
+        isNewRelease: true
+    },
+    {
         id: "tv-aggretsuko",
         title: "Aggretsuko",
         description: "Frustrated with her thankless office job, Retsuko the red panda copes with her daily struggles by singing death metal at a local karaoke bar.",
@@ -8887,5 +8957,13 @@ export const PARTNERS: Partner[] = [
     description: "Centered around gaming excellence.",
     link: "https://axiseducation.one",
     logo: "https://raw.githubusercontent.com/1sunW/ICONS-FOR-LINKS/refs/heads/main/axis.png"
+  },
+  {
+    id: 'p11',
+    name: "Games Unite",
+    owner: "Games Unite",
+    description: "Uniting others alike.",
+    link: "https://sites.google.com/view/iktkiytktktk-hdhdhdh/",
+    logo: "https://raw.githubusercontent.com/1sunW/ICONS-FOR-LINKS/refs/heads/main/Games%20Unite.png"
   }
 ];

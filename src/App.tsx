@@ -1083,6 +1083,8 @@ export default function App() {
                   </h2>
                   <ul className="space-y-6">
                     {[
+                      { date: '05/26/2026', title: "Partnered with Games Unite", details: "Officialized a new partnership with Games Unite. Uniting others alike." },
+                      { date: '05/24/2026', title: "Added The Boys, Swapped, Obsession, TMRG & TDWP 2", details: "Added Swapped, Obsession, Star Wars: The Mandalorian & Grogu, and The Devil Wears Prada 2 movies, plus The Boys TV show. Enabled dynamic custom IMDb Ratings." },
                       { date: '05/23/2026', title: "Added Aggretsuko & It: Chapter Two", details: "Added Aggretsuko TV show and It: Chapter Two movie." },
                       { date: '05/22/2026', title: "Added Stranger Things: Tales from '85", details: "Added the Stranger Things: Tales from '85 TV show series." },
                       { date: '05/20/2026', title: 'Added TADC Movie', details: 'Added The Amazing Digital Circus Movie.' },
@@ -1581,8 +1583,8 @@ export default function App() {
                       <div className="flex items-center gap-4 text-sm">
                         <span className="bg-imm-accent/10 text-imm-accent px-3 py-1 rounded-full font-bold text-[10px] uppercase tracking-wider">Latest Update</span>
                         <div className="flex items-center gap-2 text-imm-text/60">
-                          <span className="font-bold">05/23/2026:</span>
-                          <span className="font-medium">Added Aggretsuko & It: Chapter Two</span>
+                          <span className="font-bold">05/26/2026:</span>
+                          <span className="font-medium">Partnered with Games Unite & updated Community Portals</span>
                         </div>
                       </div>
                     </div>
